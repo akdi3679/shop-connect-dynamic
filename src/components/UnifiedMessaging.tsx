@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Send, X, Bot, Users, MessageSquare, Instagram, Phone, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from './ui/button';
@@ -148,7 +147,7 @@ export const UnifiedMessaging = () => {
       {/* Chat Toggle Button */}
       <Button
         onClick={handleOpen}
-        className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-white/90 backdrop-blur-xl border border-gray-200/50 shadow-xl transition-all duration-300 hover:scale-110 hover:bg-white/95"
+        className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-white/80 backdrop-blur-xl border border-white/20 shadow-xl transition-all duration-300 hover:scale-110 hover:bg-white/90"
         size="icon"
       >
         <MessageCircle className="h-7 w-7 text-gray-700" />
@@ -159,28 +158,28 @@ export const UnifiedMessaging = () => {
         )}
       </Button>
 
-      {/* Chat Window - Clean & Simple */}
+      {/* Chat Window - Glass Effect Restored */}
       {isOpen && (
         <div 
           ref={panelRef}
-          className="fixed bottom-6 right-6 z-50 w-96 h-[480px] bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/30 flex flex-col overflow-hidden animate-scale-in"
+          className="fixed bottom-6 right-6 z-50 w-96 h-[480px] bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 flex flex-col overflow-hidden animate-scale-in"
         >
           {/* Header */}
-          <div className="bg-white/80 backdrop-blur-sm p-4 border-b border-gray-200/30">
+          <div className="bg-white/50 backdrop-blur-sm p-4 border-b border-white/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-gray-100/80 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-white/60 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20">
                   {activeTab === 'ai' ? (
-                    <Bot className="h-6 w-6 text-gray-600" />
+                    <Bot className="h-6 w-6 text-gray-700" />
                   ) : (
-                    <Users className="h-6 w-6 text-gray-600" />
+                    <Users className="h-6 w-6 text-gray-700" />
                   )}
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-800 text-lg">
                     {activeTab === 'ai' ? 'AI Assistant' : 'Support Team'}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-600">
                     {activeTab === 'ai' ? 'Always here to help!' : 'Online now'}
                   </p>
                 </div>
@@ -188,7 +187,7 @@ export const UnifiedMessaging = () => {
               <Button 
                 size="sm" 
                 variant="ghost" 
-                className="text-gray-400 hover:bg-gray-100/50 rounded-full p-2"
+                className="text-gray-500 hover:bg-white/30 rounded-full p-2"
                 onClick={() => setIsOpen(false)}
               >
                 <X className="h-5 w-5" />
@@ -197,12 +196,12 @@ export const UnifiedMessaging = () => {
           </div>
 
           {/* Tab Switcher */}
-          <div className="flex bg-gray-50/50 border-b border-gray-200/30 p-1 mx-4 mt-2 rounded-2xl">
+          <div className="flex bg-white/30 border-b border-white/20 p-1 mx-4 mt-2 rounded-2xl backdrop-blur-sm">
             <button
               className={`flex-1 py-3 px-4 text-sm font-medium transition-all duration-300 rounded-xl flex items-center justify-center space-x-2 ${
                 activeTab === 'ai'
-                  ? 'bg-white text-gray-800 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-white/70 text-gray-800 shadow-sm backdrop-blur-sm'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-white/20'
               }`}
               onClick={() => setActiveTab('ai')}
             >
@@ -212,8 +211,8 @@ export const UnifiedMessaging = () => {
             <button
               className={`flex-1 py-3 px-4 text-sm font-medium transition-all duration-300 rounded-xl flex items-center justify-center space-x-2 ${
                 activeTab === 'support'
-                  ? 'bg-white text-gray-800 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-white/70 text-gray-800 shadow-sm backdrop-blur-sm'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-white/20'
               }`}
               onClick={() => setActiveTab('support')}
             >
@@ -222,7 +221,7 @@ export const UnifiedMessaging = () => {
             </button>
           </div>
 
-          {/* Messages - Hidden Scrollbar */}
+          {/* Messages - No Scrollbar */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
             {currentMessages.map((message) => (
               <div
@@ -231,8 +230,8 @@ export const UnifiedMessaging = () => {
               >
                 <div className={`max-w-[85%] ${
                   message.sender === 'user'
-                    ? 'bg-blue-500 text-white rounded-2xl rounded-br-md'
-                    : 'bg-gray-100 text-gray-800 rounded-2xl rounded-bl-md'
+                    ? 'bg-black/80 text-white rounded-2xl rounded-br-md backdrop-blur-sm'
+                    : 'bg-white/60 text-gray-800 rounded-2xl rounded-bl-md backdrop-blur-sm border border-white/20'
                 } p-4 shadow-sm`}>
                   {(message.sender === 'bot' || message.sender === 'support') && (
                     <div className="flex items-center space-x-2 mb-2">
@@ -248,7 +247,7 @@ export const UnifiedMessaging = () => {
                   )}
                   <p className="text-sm leading-relaxed">{message.text}</p>
                   <p className={`text-xs mt-2 ${
-                    message.sender === 'user' ? 'text-blue-100' : 'text-gray-400'
+                    message.sender === 'user' ? 'text-white/70' : 'text-gray-500'
                   }`}>
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
@@ -258,7 +257,7 @@ export const UnifiedMessaging = () => {
             
             {activeTab === 'ai' && isTyping && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 rounded-2xl rounded-bl-md p-4 shadow-sm">
+                <div className="bg-white/60 rounded-2xl rounded-bl-md p-4 shadow-sm backdrop-blur-sm border border-white/20">
                   <div className="flex items-center space-x-2 mb-2">
                     <Bot className="h-4 w-4 text-gray-500" />
                     <span className="text-xs font-semibold text-gray-500">AI Assistant</span>
@@ -275,13 +274,13 @@ export const UnifiedMessaging = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Contact Options - Support Tab Only */}
+          {/* Contact Options - Support Tab Only (Above Send Button) */}
           {activeTab === 'support' && (
-            <div className="px-4 py-3 border-t border-gray-200/30 bg-white/50">
+            <div className="px-4 py-3 border-t border-white/20 bg-white/40 backdrop-blur-sm">
               <div className="flex flex-col items-center space-y-3">
                 <button
                   onClick={() => setShowContactOptions(!showContactOptions)}
-                  className="flex items-center space-x-2 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                  className="flex items-center space-x-2 text-xs text-gray-600 hover:text-gray-800 transition-colors"
                 >
                   <span>Other ways to reach us</span>
                   {showContactOptions ? (
@@ -296,21 +295,21 @@ export const UnifiedMessaging = () => {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="w-10 h-10 rounded-full bg-green-50 hover:bg-green-100 p-0"
+                      className="w-10 h-10 rounded-full bg-green-500/10 hover:bg-green-500/20 p-0 backdrop-blur-sm border border-white/20"
                     >
                       <MessageSquare className="h-5 w-5 text-green-600" />
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="w-10 h-10 rounded-full bg-pink-50 hover:bg-pink-100 p-0"
+                      className="w-10 h-10 rounded-full bg-pink-500/10 hover:bg-pink-500/20 p-0 backdrop-blur-sm border border-white/20"
                     >
                       <Instagram className="h-5 w-5 text-pink-600" />
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="w-10 h-10 rounded-full bg-blue-50 hover:bg-blue-100 p-0"
+                      className="w-10 h-10 rounded-full bg-blue-500/10 hover:bg-blue-500/20 p-0 backdrop-blur-sm border border-white/20"
                     >
                       <Phone className="h-5 w-5 text-blue-600" />
                     </Button>
@@ -321,13 +320,13 @@ export const UnifiedMessaging = () => {
           )}
 
           {/* Input with Glass Send Button */}
-          <div className="p-4 border-t border-gray-200/30 bg-white/50">
+          <div className="p-4 border-t border-white/20 bg-white/40 backdrop-blur-sm">
             <div className="flex space-x-3">
               <Input
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder={activeTab === 'ai' ? "Ask me about GourmetGo..." : "Type your message..."}
-                className="flex-1 rounded-2xl border-gray-200 focus:border-blue-300 bg-gray-50/50 text-gray-800 placeholder:text-gray-400 px-4 py-3"
+                className="flex-1 rounded-2xl border-white/30 focus:border-white/50 bg-white/50 text-gray-800 placeholder:text-gray-500 px-4 py-3 backdrop-blur-sm"
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                 disabled={isTyping && activeTab === 'ai'}
               />
@@ -335,7 +334,7 @@ export const UnifiedMessaging = () => {
                 onClick={sendMessage}
                 size="icon"
                 disabled={isTyping && activeTab === 'ai'}
-                className="w-12 h-12 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 backdrop-blur-sm shadow-lg transition-all duration-300 hover:scale-105"
+                className="w-12 h-12 rounded-2xl bg-gradient-to-r from-black/70 to-black/80 hover:from-black/80 hover:to-black/90 backdrop-blur-sm shadow-lg transition-all duration-300 hover:scale-105 border border-white/20"
               >
                 <Send className="h-5 w-5 text-white" />
               </Button>
