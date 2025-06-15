@@ -56,13 +56,13 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         
-        {/* Price badge - positioned bottom right above the name */}
-        <div className="absolute bottom-12 right-4 bg-black/80 backdrop-blur-sm text-white rounded-full px-3 py-1 border border-white/20">
+        {/* Price badge - positioned higher above the name */}
+        <div className="absolute bottom-16 right-4 bg-black/80 backdrop-blur-sm text-white rounded-full px-3 py-1 border border-white/20">
           <span className="text-sm font-bold">${product.price.toFixed(2)}</span>
         </div>
 
-        {/* Product name with gradient black to transparent glass effect */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent backdrop-blur-md text-white p-4">
+        {/* Product name with gradient black to transparent without blur */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-4">
           <h3 className="text-lg font-bold text-white">{product.name}</h3>
         </div>
 
