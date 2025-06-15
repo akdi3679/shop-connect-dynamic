@@ -149,20 +149,6 @@ export const ProductCarousel = () => {
       </div>
       
       <div className="flex-1 relative flex items-center justify-center mb-8">
-        {/* Animated background based on selected category */}
-        <div 
-          className={`absolute inset-0 bg-gradient-radial ${getCategoryBackground(selectedCategory)} rounded-3xl transition-all duration-1000 ease-out opacity-0 animate-[fadeIn_0.8s_ease-out_0.3s_forwards] blur-xl scale-110`}
-        />
-        
-        {/* Speed lines effect during sliding */}
-        {isSliding && (
-          <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[slideSpeedLines_0.5s_ease-out] transform translate-x-[-100%]" />
-            <div className="absolute top-1/4 left-0 right-0 h-px bg-white/20 animate-[slideSpeedLines_0.5s_ease-out_0.1s] transform translate-x-[-100%]" />
-            <div className="absolute top-3/4 left-0 right-0 h-px bg-white/20 animate-[slideSpeedLines_0.5s_ease-out_0.2s] transform translate-x-[-100%]" />
-          </div>
-        )}
-
         <div 
           ref={carouselRef}
           className="w-full max-w-md mx-auto cursor-grab active:cursor-grabbing relative z-10"
@@ -181,8 +167,24 @@ export const ProductCarousel = () => {
             }}
           >
             {filteredProducts.map((product, index) => (
-              <div key={product.id} className="w-full flex-shrink-0 px-4">
-                <div className={`transition-all duration-500 ${
+              <div key={product.id} className="w-full flex-shrink-0 px-4 relative">
+                {/* Animated background closer to product edges */}
+                {index === currentIndex && (
+                  <div 
+                    className={`absolute inset-2 bg-gradient-radial ${getCategoryBackground(selectedCategory)} rounded-3xl transition-all duration-1000 ease-out opacity-0 animate-[fadeIn_0.8s_ease-out_0.5s_forwards] blur-lg z-0`}
+                  />
+                )}
+                
+                {/* Speed lines effect during sliding */}
+                {isSliding && index === currentIndex && (
+                  <div className="absolute inset-2 pointer-events-none overflow-hidden rounded-3xl z-10">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[slideSpeedLines_0.5s_ease-out] transform translate-x-[-100%]" />
+                    <div className="absolute top-1/4 left-0 right-0 h-px bg-white/20 animate-[slideSpeedLines_0.5s_ease-out_0.1s] transform translate-x-[-100%]" />
+                    <div className="absolute top-3/4 left-0 right-0 h-px bg-white/20 animate-[slideSpeedLines_0.5s_ease-out_0.2s] transform translate-x-[-100%]" />
+                  </div>
+                )}
+
+                <div className={`transition-all duration-500 relative z-20 ${
                   index === currentIndex 
                     ? 'scale-100 opacity-100 animate-[productAppear_0.6s_ease-out_0.2s_both]' 
                     : index === currentIndex - 1 || (currentIndex === 0 && index === filteredProducts.length - 1)

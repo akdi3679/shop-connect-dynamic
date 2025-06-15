@@ -69,17 +69,10 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       </CardHeader>
 
       <CardContent className="flex-grow">
-        <div className="flex justify-between items-center">
-          <div>
-            <p className="text-3xl font-bold text-black">
-              ${product.price.toFixed(2)}
-            </p>
-            <p className="text-sm text-black/60">Free delivery</p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-green-600 font-semibold">✓ Available</p>
-            <p className="text-xs text-black/50">Ready in 15-20 min</p>
-          </div>
+        <div className="flex justify-center items-center">
+          <p className="text-3xl font-bold text-black">
+            ${product.price.toFixed(2)}
+          </p>
         </div>
       </CardContent>
 
