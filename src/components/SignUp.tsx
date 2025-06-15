@@ -59,23 +59,23 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitchToLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 relative overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-20 left-20 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-700"></div>
-        <div className="absolute -bottom-8 left-40 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-1000"></div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-gray-50 p-4 relative overflow-hidden">
+      {/* Background blur effects */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-20 left-20 w-72 h-72 bg-black rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-72 h-72 bg-gray-600 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-700"></div>
+        <div className="absolute -bottom-8 left-40 w-72 h-72 bg-gray-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-1000"></div>
       </div>
 
       <Card className="w-full max-w-3xl glass-morphism border-0 shadow-2xl backdrop-blur-xl bg-white/80 relative z-10">
         <CardHeader className="text-center pb-8">
-          <div className="mx-auto mb-6 w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg animate-scale-in">
+          <div className="mx-auto mb-6 w-16 h-16 bg-black rounded-2xl flex items-center justify-center shadow-lg animate-scale-in">
             <UserPlus className="h-8 w-8 text-white" />
           </div>
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+          <CardTitle className="text-3xl font-bold text-black">
             Create Supplier Account
           </CardTitle>
-          <CardDescription className="text-gray-600 text-lg">
+          <CardDescription className="text-black/60 text-lg">
             Register your store to start managing orders
           </CardDescription>
         </CardHeader>
@@ -101,11 +101,11 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitchToLogin }) => {
                   rules={{ required: 'First name is required' }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 font-semibold">First Name</FormLabel>
+                      <FormLabel className="text-black font-semibold">First Name</FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="Enter your first name" 
-                          className="h-12 bg-white/70 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                          className="h-12 bg-white/70 border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200" 
                           {...field} 
                         />
                       </FormControl>
@@ -120,11 +120,11 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitchToLogin }) => {
                   rules={{ required: 'Last name is required' }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 font-semibold">Last Name</FormLabel>
+                      <FormLabel className="text-black font-semibold">Last Name</FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="Enter your last name" 
-                          className="h-12 bg-white/70 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                          className="h-12 bg-white/70 border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200" 
                           {...field} 
                         />
                       </FormControl>
@@ -140,14 +140,14 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitchToLogin }) => {
                 rules={{ required: 'Store name is required' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-700 font-semibold flex items-center">
+                    <FormLabel className="text-black font-semibold flex items-center">
                       <Store className="h-4 w-4 mr-2" />
                       Store Name
                     </FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="Enter your store name" 
-                        className="h-12 bg-white/70 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                        className="h-12 bg-white/70 border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200" 
                         {...field} 
                       />
                     </FormControl>
@@ -166,11 +166,11 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitchToLogin }) => {
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 font-semibold">Username</FormLabel>
+                      <FormLabel className="text-black font-semibold">Username</FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="Choose a username" 
-                          className="h-12 bg-white/70 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                          className="h-12 bg-white/70 border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200" 
                           {...field} 
                         />
                       </FormControl>
@@ -188,12 +188,12 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitchToLogin }) => {
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 font-semibold">Email</FormLabel>
+                      <FormLabel className="text-black font-semibold">Email</FormLabel>
                       <FormControl>
                         <Input 
                           type="email" 
                           placeholder="Enter your email" 
-                          className="h-12 bg-white/70 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                          className="h-12 bg-white/70 border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200" 
                           {...field} 
                         />
                       </FormControl>
@@ -209,11 +209,11 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitchToLogin }) => {
                 rules={{ required: 'Phone number is required' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-700 font-semibold">Phone Number</FormLabel>
+                    <FormLabel className="text-black font-semibold">Phone Number</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="Enter your phone number" 
-                        className="h-12 bg-white/70 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                        className="h-12 bg-white/70 border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200" 
                         {...field} 
                       />
                     </FormControl>
@@ -228,11 +228,11 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitchToLogin }) => {
                 rules={{ required: 'Location is required' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-700 font-semibold">Location</FormLabel>
+                    <FormLabel className="text-black font-semibold">Location</FormLabel>
                     <FormControl>
                       <Textarea 
                         placeholder="Enter your store address/location" 
-                        className="bg-white/70 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-[80px]" 
+                        className="bg-white/70 border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 min-h-[80px]" 
                         {...field} 
                       />
                     </FormControl>
@@ -251,19 +251,19 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitchToLogin }) => {
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 font-semibold">Password</FormLabel>
+                      <FormLabel className="text-black font-semibold">Password</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input 
                             type={showPassword ? "text" : "password"} 
                             placeholder="Create a password" 
-                            className="h-12 bg-white/70 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 pr-12" 
+                            className="h-12 bg-white/70 border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 pr-12" 
                             {...field} 
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black transition-colors"
                           >
                             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                           </button>
@@ -280,19 +280,19 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitchToLogin }) => {
                   rules={{ required: 'Please confirm your password' }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 font-semibold">Confirm Password</FormLabel>
+                      <FormLabel className="text-black font-semibold">Confirm Password</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input 
                             type={showConfirmPassword ? "text" : "password"} 
                             placeholder="Confirm your password" 
-                            className="h-12 bg-white/70 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 pr-12" 
+                            className="h-12 bg-white/70 border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 pr-12" 
                             {...field} 
                           />
                           <button
                             type="button"
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black transition-colors"
                           >
                             {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                           </button>
@@ -316,7 +316,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSwitchToLogin }) => {
                 </Button>
                 <Button 
                   type="submit" 
-                  className="flex-1 h-12 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="flex-1 h-12 bg-black hover:bg-gray-800 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                   <Sparkles className="h-4 w-4 mr-2" />
                   Create Account
