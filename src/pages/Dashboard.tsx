@@ -1,16 +1,17 @@
-
 import { useState } from 'react';
-import { BarChart3, Package, Users, Settings, LogOut, Home } from 'lucide-react';
+import { BarChart3, Package, Users, Settings, LogOut, Home, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const { user, logout } = useAuth();
 
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'orders', label: 'Orders', icon: Package },
-    { id: 'suppliers', label: 'Suppliers', icon: Users },
+    { id: 'suppliers', label: 'Suppliers', icon: Users, adminOnly: true },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -18,16 +19,42 @@ const Dashboard = () => {
     window.location.href = '/';
   };
 
+  const handleLogout = () => {
+    logout();
+  };
+
+  const filteredMenuItems = menuItems.filter(item => 
+    !item.adminOnly || user?.role === 'admin'
+  );
+
   return (
     <div className="h-screen flex bg-gray-50">
       {/* Sidebar */}
       <div className="w-64 bg-white border-r flex flex-col">
         <div className="p-6 border-b">
-          <h1 className="text-xl font-bold">Admin Dashboard</h1>
+          <h1 className="text-xl font-bold">
+            {user?.role === 'admin' ? 'Admin Dashboard' : 'Supplier Dashboard'}
+          </h1>
+          <div className="mt-2 p-2 bg-gray-50 rounded-lg">
+            <div className="flex items-center space-x-2 mb-1">
+              <User className="h-4 w-4 text-gray-600" />
+              <span className="text-sm font-medium text-gray-900">
+                {user?.firstName} {user?.lastName}
+              </span>
+            </div>
+            {user?.storeName && (
+              <p className="text-xs text-gray-600">Store: {user.storeName}</p>
+            )}
+            {user?.isGuest && (
+              <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                Guest User
+              </span>
+            )}
+          </div>
         </div>
         
         <nav className="flex-1 p-4">
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const Icon = item.icon;
             return (
               <button
@@ -55,7 +82,7 @@ const Dashboard = () => {
             <Home className="h-4 w-4 mr-2" />
             Back to Store
           </Button>
-          <Button variant="ghost" className="w-full">
+          <Button variant="ghost" className="w-full" onClick={handleLogout}>
             <LogOut className="h-4 w-4 mr-2" />
             Logout
           </Button>
@@ -71,28 +98,40 @@ const Dashboard = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Total Orders</CardTitle>
-                  <CardDescription>Today's orders</CardDescription>
+                  <CardDescription>
+                    {user?.role === 'admin' ? "Today's orders" : "Your orders today"}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">24</div>
+                  <div className="text-3xl font-bold">
+                    {user?.role === 'admin' ? '24' : '8'}
+                  </div>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader>
                   <CardTitle>Revenue</CardTitle>
-                  <CardDescription>Today's revenue</CardDescription>
+                  <CardDescription>
+                    {user?.role === 'admin' ? "Today's revenue" : "Your revenue today"}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">$1,234</div>
+                  <div className="text-3xl font-bold">
+                    {user?.role === 'admin' ? '$1,234' : '$456'}
+                  </div>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>Active Suppliers</CardTitle>
+                  <CardTitle>
+                    {user?.role === 'admin' ? 'Active Suppliers' : 'Active Products'}
+                  </CardTitle>
                   <CardDescription>Currently active</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">8</div>
+                  <div className="text-3xl font-bold">
+                    {user?.role === 'admin' ? '8' : '12'}
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -112,6 +151,9 @@ const Dashboard = () => {
                     <div>
                       <p className="font-semibold">Order #1234</p>
                       <p className="text-sm text-gray-600">Artisanal Pizza - $14.99</p>
+                      {user?.role === 'admin' && (
+                        <p className="text-xs text-gray-500">From: Mario's Pizzeria</p>
+                      )}
                     </div>
                     <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
                       Completed
@@ -121,6 +163,9 @@ const Dashboard = () => {
                     <div>
                       <p className="font-semibold">Order #1235</p>
                       <p className="text-sm text-gray-600">Gourmet Burger - $12.50</p>
+                      {user?.role === 'admin' && (
+                        <p className="text-xs text-gray-500">From: Burger House</p>
+                      )}
                     </div>
                     <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
                       Preparing
@@ -132,7 +177,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        {activeTab === 'suppliers' && (
+        {activeTab === 'suppliers' && user?.role === 'admin' && (
           <div>
             <h2 className="text-2xl font-bold mb-6">Supplier Management</h2>
             <Card>
@@ -170,18 +215,19 @@ const Dashboard = () => {
             <h2 className="text-2xl font-bold mb-6">Settings</h2>
             <Card>
               <CardHeader>
-                <CardTitle>Application Settings</CardTitle>
+                <CardTitle>{user?.role === 'admin' ? 'Application Settings' : 'Store Settings'}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium mb-2">
-                      Restaurant Name
+                      {user?.role === 'admin' ? 'Restaurant Name' : 'Store Name'}
                     </label>
                     <input 
                       type="text" 
                       className="w-full p-2 border rounded-lg"
-                      defaultValue="GourmetGo"
+                      defaultValue={user?.role === 'admin' ? 'GourmetGo' : user?.storeName || ''}
+                      disabled={user?.isGuest}
                     />
                   </div>
                   <div>
@@ -191,10 +237,41 @@ const Dashboard = () => {
                     <input 
                       type="email" 
                       className="w-full p-2 border rounded-lg"
-                      defaultValue="admin@gourmetgo.com"
+                      defaultValue={user?.email || ''}
+                      disabled={user?.isGuest}
                     />
                   </div>
-                  <Button>Save Settings</Button>
+                  {user?.phoneNumber && (
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Phone Number
+                      </label>
+                      <input 
+                        type="tel" 
+                        className="w-full p-2 border rounded-lg"
+                        defaultValue={user.phoneNumber}
+                        disabled={user?.isGuest}
+                      />
+                    </div>
+                  )}
+                  {user?.location && (
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Location
+                      </label>
+                      <textarea 
+                        className="w-full p-2 border rounded-lg"
+                        defaultValue={user.location}
+                        disabled={user?.isGuest}
+                      />
+                    </div>
+                  )}
+                  {!user?.isGuest && <Button>Save Settings</Button>}
+                  {user?.isGuest && (
+                    <p className="text-sm text-gray-500">
+                      Settings are read-only for guest users. Create an account to edit settings.
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
