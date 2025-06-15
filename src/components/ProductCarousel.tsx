@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Sandwich, Salad } from 'lucide-react';
 import { products } from '@/data/products';
@@ -110,7 +109,7 @@ export const ProductCarousel = () => {
       {/* Category Filter */}
       <div className="mb-8 flex justify-center">
         <div className="flex space-x-4">
-          {allCategories.map((category) => {
+          {categories.map((category) => {
             const IconComponent = category.icon;
             return (
               <Button
