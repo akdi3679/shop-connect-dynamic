@@ -1,4 +1,5 @@
 
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,7 +22,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     soundManager.play('addToCart');
     
     toast.success(
-      <div className="flex items-center space-x-3 bg-white/95 backdrop-blur-lg rounded-xl p-4 border border-white/30 shadow-lg w-full">
+      <div className="flex items-center space-x-3 bg-white backdrop-blur-lg rounded-xl p-4 border border-white/30 shadow-lg w-full">
         <div className="w-12 h-12 rounded-xl overflow-hidden shadow-sm">
           <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
         </div>
@@ -86,3 +87,4 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     </Card>
   );
 };
+
