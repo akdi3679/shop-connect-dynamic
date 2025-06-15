@@ -62,8 +62,8 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         </div>
 
         {/* Product name with gradient glass effect */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm text-white p-4 rounded-b-3xl">
-          <h3 className="text-lg font-bold text-white">{product.name}</h3>
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent backdrop-blur-md text-white p-6 rounded-b-3xl border-t border-white/10">
+          <h3 className="text-lg font-bold text-white drop-shadow-lg">{product.name}</h3>
         </div>
 
         {/* Add to cart button - floating on image */}
