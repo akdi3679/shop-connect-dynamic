@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, X, Bot } from 'lucide-react';
+import { MessageCircle, Send, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { soundManager } from '@/utils/sounds';
@@ -126,38 +126,36 @@ export const UnifiedMessaging = () => {
 
   return (
     <>
-      {/* Chat Toggle Button */}
+      {/* Unified Chat Toggle Button */}
       <Button
         onClick={handleOpen}
-        className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-black/90 hover:bg-black backdrop-blur-xl border border-white/20 shadow-2xl transition-all duration-300 hover:scale-110"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl transition-all duration-300 hover:scale-110 hover:bg-white/20"
         size="icon"
       >
-        <MessageCircle className="h-6 w-6 text-white" />
+        <MessageCircle className="h-6 w-6 text-black" />
         {unreadCount > 0 && (
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center animate-bounce">
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-bounce">
             {unreadCount}
           </span>
         )}
       </Button>
 
-      {/* Chat Window */}
+      {/* Elegant Chat Window - iOS 26 Style */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-96 h-96 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-black/10 flex flex-col overflow-hidden animate-scale-in">
-          {/* Header */}
-          <div className="bg-black/90 backdrop-blur-xl p-4 flex items-center justify-between border-b border-white/10">
+        <div className="fixed bottom-24 right-6 z-50 w-96 h-[500px] bg-white/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/30 flex flex-col overflow-hidden animate-scale-in">
+          {/* Elegant Header */}
+          <div className="bg-white/20 backdrop-blur-xl p-4 flex items-center justify-between border-b border-white/20">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                {activeTab === 'ai' ? (
-                  <Bot className="h-5 w-5 text-white" />
-                ) : (
-                  <span className="text-xl">👨‍🍳</span>
-                )}
+              <div className="w-10 h-10 bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center">
+                <span className="text-xl">
+                  {activeTab === 'ai' ? '🤖' : '👨‍🍳'}
+                </span>
               </div>
               <div>
-                <h3 className="font-semibold text-white">
+                <h3 className="font-semibold text-black">
                   {activeTab === 'ai' ? 'AI Assistant' : 'GourmetGo Support'}
                 </h3>
-                <p className="text-sm text-white/70">
+                <p className="text-sm text-black/70">
                   {activeTab === 'ai' ? 'Always here to help!' : 'Online'}
                 </p>
               </div>
@@ -165,30 +163,30 @@ export const UnifiedMessaging = () => {
             <Button 
               size="sm" 
               variant="ghost" 
-              className="text-white hover:bg-white/20 rounded-full p-2"
+              className="text-black/70 hover:bg-white/20 rounded-full p-2 backdrop-blur-sm"
               onClick={() => setIsOpen(false)}
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
 
-          {/* Tab Switcher */}
-          <div className="flex bg-black/5 border-b border-black/10">
+          {/* Elegant Tab Switcher */}
+          <div className="flex bg-white/10 backdrop-blur-sm border-b border-white/20">
             <button
-              className={`flex-1 py-3 px-4 text-sm font-medium transition-all duration-300 ${
+              className={`flex-1 py-3 px-4 text-sm font-medium transition-all duration-500 backdrop-blur-sm ${
                 activeTab === 'ai'
-                  ? 'bg-black text-white'
-                  : 'text-black/70 hover:text-black hover:bg-black/5'
+                  ? 'bg-white/30 text-black shadow-lg'
+                  : 'text-black/70 hover:text-black hover:bg-white/20'
               }`}
               onClick={() => setActiveTab('ai')}
             >
               AI Assistant
             </button>
             <button
-              className={`flex-1 py-3 px-4 text-sm font-medium transition-all duration-300 ${
+              className={`flex-1 py-3 px-4 text-sm font-medium transition-all duration-500 backdrop-blur-sm ${
                 activeTab === 'support'
-                  ? 'bg-black text-white'
-                  : 'text-black/70 hover:text-black hover:bg-black/5'
+                  ? 'bg-white/30 text-black shadow-lg'
+                  : 'text-black/70 hover:text-black hover:bg-white/20'
               }`}
               onClick={() => setActiveTab('support')}
             >
@@ -197,7 +195,7 @@ export const UnifiedMessaging = () => {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-white/50 to-black/5">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-white/20 to-white/40 backdrop-blur-sm">
             {currentMessages.map((message) => (
               <div
                 key={message.id}
@@ -205,16 +203,12 @@ export const UnifiedMessaging = () => {
               >
                 <div className={`max-w-[85%] ${
                   message.sender === 'user'
-                    ? 'bg-black text-white rounded-2xl rounded-br-md'
-                    : 'bg-white/90 backdrop-blur-sm text-black rounded-2xl rounded-bl-md border border-black/10'
-                } p-3 shadow-sm`}>
+                    ? 'bg-black/90 text-white rounded-2xl rounded-br-md backdrop-blur-xl'
+                    : 'bg-white/80 backdrop-blur-xl text-black rounded-2xl rounded-bl-md border border-white/30'
+                } p-3 shadow-lg`}>
                   {(message.sender === 'bot' || message.sender === 'support') && (
                     <div className="flex items-center space-x-2 mb-2">
-                      {message.sender === 'bot' ? (
-                        <Bot className="h-4 w-4 text-black/70" />
-                      ) : (
-                        <span className="text-sm">{message.avatar}</span>
-                      )}
+                      <span className="text-sm">{message.sender === 'bot' ? '🤖' : message.avatar}</span>
                       <span className="text-xs font-semibold text-black/60">
                         {message.sender === 'bot' ? 'AI Assistant' : 'Support'}
                       </span>
@@ -232,9 +226,9 @@ export const UnifiedMessaging = () => {
             
             {activeTab === 'ai' && isTyping && (
               <div className="flex justify-start">
-                <div className="bg-white/90 backdrop-blur-sm rounded-2xl rounded-bl-md p-3 shadow-sm border border-black/10">
+                <div className="bg-white/80 backdrop-blur-xl rounded-2xl rounded-bl-md p-3 shadow-lg border border-white/30">
                   <div className="flex items-center space-x-2 mb-2">
-                    <Bot className="h-4 w-4 text-black/70" />
+                    <span className="text-sm">🤖</span>
                     <span className="text-xs font-semibold text-black/60">AI Assistant</span>
                   </div>
                   <div className="flex space-x-1">
@@ -249,14 +243,14 @@ export const UnifiedMessaging = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
-          <div className="p-4 border-t border-black/10 bg-white/50 backdrop-blur-sm">
+          {/* Elegant Input */}
+          <div className="p-4 border-t border-white/20 bg-white/20 backdrop-blur-xl">
             <div className="flex space-x-2">
               <Input
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder={activeTab === 'ai' ? "Ask me about GourmetGo..." : "Type your message..."}
-                className="flex-1 rounded-full border-black/20 focus:border-black bg-white/80 backdrop-blur-sm"
+                className="flex-1 rounded-full border-white/30 focus:border-white/50 bg-white/40 backdrop-blur-sm text-black placeholder:text-black/50"
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                 disabled={isTyping && activeTab === 'ai'}
               />
@@ -264,7 +258,7 @@ export const UnifiedMessaging = () => {
                 onClick={sendMessage}
                 size="icon"
                 disabled={isTyping && activeTab === 'ai'}
-                className="rounded-full bg-black hover:bg-black/80"
+                className="rounded-full bg-black/80 hover:bg-black/90 backdrop-blur-sm"
               >
                 <Send className="h-4 w-4" />
               </Button>
