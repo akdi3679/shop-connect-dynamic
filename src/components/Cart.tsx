@@ -17,19 +17,17 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent className="flex flex-col bg-white/90 backdrop-blur-lg border-l border-white/30 shadow-2xl w-full sm:max-w-sm">
-        <SheetHeader className="pb-4 flex flex-row items-center justify-between">
+        {cartItems.length > 0 && (
+          <Button
+            variant="ghost"
+            onClick={clearCart}
+            className="absolute top-5 right-14 text-sm font-medium text-black hover:text-red-600 hover:bg-red-50 px-2 py-1 h-auto rounded-md"
+          >
+            Clear
+          </Button>
+        )}
+        <SheetHeader className="pb-4">
           <SheetTitle className="text-xl font-bold text-black">Your Cart</SheetTitle>
-          <div className="flex items-center gap-3">
-            {cartItems.length > 0 && (
-              <Button 
-                variant="ghost" 
-                onClick={clearCart}
-                className="text-sm font-medium text-black hover:text-red-600 hover:bg-red-50 px-2 py-1 h-auto"
-              >
-                Clear
-              </Button>
-            )}
-          </div>
         </SheetHeader>
         {cartItems.length > 0 ? (
           <>
@@ -40,7 +38,7 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
                     <img src={item.image} alt={item.name} className="h-16 w-16 rounded-xl object-cover shadow-sm" />
                     <div className="flex-grow">
                       <p className="font-semibold text-black">{item.name}</p>
-                      <p className="text-sm text-gray-700">د {item.price.toFixed(2)}</p>
+                      <p className="text-sm text-gray-700">{item.price.toFixed(2)} د</p>
                       <div className="flex items-center space-x-2 mt-2">
                         <Input
                           type="number"
@@ -68,10 +66,10 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
                 <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-white/30">
                   <div className="flex justify-between font-bold text-xl text-black">
                     <span>Total</span>
-                    <span>د {cartTotal.toFixed(2)}</span>
+                    <span>{cartTotal.toFixed(2)} د</span>
                   </div>
                   <div className="flex justify-between items-center mt-2">
-                    <p className="text-xs text-gray-600">Shipping cost: د 7.00</p>
+                    <p className="text-xs text-gray-600">Shipping cost: 7.00 د</p>
                     <div className="flex items-center gap-1 text-xs text-gray-500">
                       <Hand className="h-3 w-3" />
                       <span className="font-script italic">Premium Quality</span>
