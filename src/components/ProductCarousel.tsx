@@ -1,63 +1,53 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Sandwich, Coffee, Salad, Cookie } from 'lucide-react';
 import { products } from '@/data/products';
 import { ProductCard } from './ProductCard';
 import { Button } from './ui/button';
 
 const categories = [
-  { id: 'all', name: 'All Items', emoji: '🍽️' },
-  { id: 'pizza', name: 'Pizza', emoji: '🍕' },
-  { id: 'burger', name: 'Burgers', emoji: '🍔' },
-  { id: 'sushi', name: 'Sushi', emoji: '🍣' },
-  { id: 'salad', name: 'Salads', emoji: '🥗' },
-  { id: 'ramen', name: 'Ramen', emoji: '🍜' },
-  { id: 'dessert', name: 'Desserts', emoji: '🍰' }
+  { id: 'sandwich', name: 'Sandwich', icon: Sandwich },
+  { id: 'drink', name: 'Drinks', icon: Coffee },
+  { id: 'salad', name: 'Salads', icon: Salad },
+  { id: 'potato', name: 'Potatoes', icon: Cookie }
 ];
 
 export const ProductCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('sandwich');
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [currentX, setCurrentX] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
 
-  const filteredProducts = selectedCategory === 'all' 
-    ? products 
-    : products.filter(product => 
-        product.name.toLowerCase().includes(selectedCategory) ||
-        (selectedCategory === 'pizza' && product.name.toLowerCase().includes('pizza')) ||
-        (selectedCategory === 'burger' && product.name.toLowerCase().includes('burger')) ||
-        (selectedCategory === 'sushi' && product.name.toLowerCase().includes('sushi')) ||
-        (selectedCategory === 'salad' && product.name.toLowerCase().includes('salad')) ||
-        (selectedCategory === 'ramen' && product.name.toLowerCase().includes('ramen')) ||
-        (selectedCategory === 'dessert' && product.name.toLowerCase().includes('cake'))
-      );
+  const filteredProducts = products.filter(product => 
+    (selectedCategory === 'sandwich' && (product.name.toLowerCase().includes('pizza') || product.name.toLowerCase().includes('burger'))) ||
+    (selectedCategory === 'drink' && product.name.toLowerCase().includes('drink')) ||
+    (selectedCategory === 'salad' && product.name.toLowerCase().includes('salad')) ||
+    (selectedCategory === 'potato' && product.name.toLowerCase().includes('potato'))
+  );
+
+  const displayProducts = filteredProducts.length > 0 ? filteredProducts : products.slice(0, 4);
 
   useEffect(() => {
     if (!isAutoPlaying || isDragging) return;
     
     const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % filteredProducts.length);
+      setCurrentIndex(prev => (prev + 1) % displayProducts.length);
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying, isDragging, filteredProducts.length]);
+  }, [isAutoPlaying, isDragging, displayProducts.length]);
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % filteredProducts.length);
+    setCurrentIndex((prev) => (prev + 1) % displayProducts.length);
     setIsAutoPlaying(false);
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + filteredProducts.length) % filteredProducts.length);
-    setIsAutoPlaying(false);
-  };
-
-  const goToSlide = (index: number) => {
-    setCurrentIndex(index);
+    setCurrentIndex((prev) => (prev - 1 + displayProducts.length) % displayProducts.length);
     setIsAutoPlaying(false);
   };
 
@@ -100,40 +90,41 @@ export const ProductCarousel = () => {
   };
 
   return (
-    <section className="flex-1 flex flex-col px-4 py-8">
-      {/* Category Filter */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
-          Our Menu
-        </h2>
-        
-        <div className="flex overflow-x-auto space-x-3 pb-4 scrollbar-hide">
-          {categories.map((category) => (
-            <Button
-              key={category.id}
-              variant={selectedCategory === category.id ? "default" : "outline"}
-              className={`flex-shrink-0 rounded-full px-6 py-3 transition-all duration-300 ${
-                selectedCategory === category.id 
-                  ? 'bg-gradient-to-r from-orange-400 to-orange-600 shadow-lg scale-105' 
-                  : 'hover:scale-105 hover:shadow-md'
-              }`}
-              onClick={() => handleCategoryChange(category.id)}
-            >
-              <span className="mr-2">{category.emoji}</span>
-              {category.name}
-            </Button>
-          ))}
+    <section className="flex-1 flex px-4 py-8 relative">
+      {/* Category Filter - Right Side */}
+      <div className="absolute right-8 top-1/2 transform -translate-y-1/2 z-10">
+        <div className="flex flex-col space-y-4">
+          {categories.map((category) => {
+            const IconComponent = category.icon;
+            return (
+              <Button
+                key={category.id}
+                variant="ghost"
+                size="icon"
+                className={`w-12 h-12 rounded-2xl transition-all duration-300 ${
+                  selectedCategory === category.id 
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg scale-110 category-active glass-morphism border-white/20' 
+                    : 'bg-white/10 hover:bg-white/20 glass-morphism border-white/10 hover:scale-105'
+                }`}
+                onClick={() => handleCategoryChange(category.id)}
+              >
+                <IconComponent className={`h-6 w-6 ${
+                  selectedCategory === category.id ? 'text-white' : 'text-white/70'
+                }`} />
+              </Button>
+            );
+          })}
         </div>
       </div>
       
-      <div className="flex-1 relative flex items-center justify-center">
+      <div className="flex-1 relative flex items-center justify-center pr-20">
         <Button
           variant="outline"
           size="icon"
-          className="absolute left-4 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full w-12 h-12 backdrop-blur-sm border-orange-200 hover:border-orange-300 transition-all duration-300 hover:scale-110"
+          className="absolute left-4 z-10 bg-white/10 hover:bg-white/20 shadow-lg rounded-full w-12 h-12 glass-morphism border-white/20 transition-all duration-300 hover:scale-110"
           onClick={prevSlide}
         >
-          <ChevronLeft className="h-5 w-5 text-orange-600" />
+          <ChevronLeft className="h-5 w-5 text-white" />
         </Button>
 
         <div 
@@ -153,13 +144,13 @@ export const ProductCarousel = () => {
               transform: `translateX(-${currentIndex * 100}%)${isDragging ? ` translateX(${(currentX - startX) * 0.5}px)` : ''}` 
             }}
           >
-            {filteredProducts.map((product, index) => (
+            {displayProducts.map((product, index) => (
               <div key={product.id} className="w-full flex-shrink-0 px-4">
-                <div className={`transition-all duration-500 ${
+                <div className={`transition-all duration-500 animate-slide-up ${
                   index === currentIndex 
                     ? 'scale-100 opacity-100' 
                     : 'scale-95 opacity-70'
-                }`}>
+                }`} style={{ animationDelay: `${index * 0.1}s` }}>
                   <ProductCard product={product} />
                 </div>
               </div>
@@ -170,37 +161,26 @@ export const ProductCarousel = () => {
         <Button
           variant="outline"
           size="icon"
-          className="absolute right-4 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full w-12 h-12 backdrop-blur-sm border-orange-200 hover:border-orange-300 transition-all duration-300 hover:scale-110"
+          className="absolute right-4 z-10 bg-white/10 hover:bg-white/20 shadow-lg rounded-full w-12 h-12 glass-morphism border-white/20 transition-all duration-300 hover:scale-110"
           onClick={nextSlide}
         >
-          <ChevronRight className="h-5 w-5 text-orange-600" />
+          <ChevronRight className="h-5 w-5 text-white" />
         </Button>
       </div>
 
       {/* Dots Indicator */}
-      <div className="flex justify-center space-x-2 mt-6">
-        {filteredProducts.map((_, index) => (
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex justify-center space-x-2">
+        {displayProducts.map((_, index) => (
           <button
             key={index}
             className={`w-3 h-3 rounded-full transition-all duration-300 ${
               index === currentIndex 
-                ? 'bg-gradient-to-r from-orange-400 to-orange-600 scale-125 shadow-lg' 
-                : 'bg-gray-300 hover:bg-gray-400'
+                ? 'bg-gradient-to-r from-indigo-400 to-purple-600 scale-125 shadow-lg' 
+                : 'bg-white/30 hover:bg-white/50'
             }`}
-            onClick={() => goToSlide(index)}
+            onClick={() => setCurrentIndex(index)}
           />
         ))}
-      </div>
-
-      {/* Progress Bar */}
-      <div className="w-32 mx-auto mt-4 h-1 bg-gray-200 rounded-full overflow-hidden">
-        <div 
-          className="h-full bg-gradient-to-r from-orange-400 to-orange-600 transition-all duration-4000 ease-linear"
-          style={{ 
-            width: isAutoPlaying && !isDragging ? '100%' : '0%',
-            transitionDuration: isAutoPlaying && !isDragging ? '4000ms' : '300ms'
-          }}
-        ></div>
       </div>
     </section>
   );
