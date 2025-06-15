@@ -1,21 +1,16 @@
 
 import { Header } from '@/components/Header';
 import { Hero } from '@/components/Hero';
-import { ProductList } from '@/components/ProductList';
+import { ProductCarousel } from '@/components/ProductCarousel';
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen w-full flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Header />
-      <main className="flex-grow">
+      <main className="flex-1 flex flex-col">
         <Hero />
-        <ProductList />
+        <ProductCarousel />
       </main>
-      <footer className="border-t py-6">
-        <div className="container text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} GourmetGo. All Rights Reserved.
-        </div>
-      </footer>
     </div>
   );
 };
