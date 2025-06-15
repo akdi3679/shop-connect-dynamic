@@ -1,5 +1,4 @@
 
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -33,7 +32,16 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             Added to cart!
           </p>
         </div>
-      </div>
+      </div>,
+      {
+        style: {
+          background: 'transparent',
+          border: 'none',
+          boxShadow: 'none',
+          padding: '0',
+        },
+        className: 'bg-transparent border-none shadow-none p-0',
+      }
     );
 
     setTimeout(() => setIsAnimating(false), 600);
@@ -87,4 +95,3 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     </Card>
   );
 };
-
