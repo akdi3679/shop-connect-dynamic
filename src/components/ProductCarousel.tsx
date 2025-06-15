@@ -1,40 +1,45 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sandwich, Salad, Potato } from 'lucide-react';
 import { products } from '@/data/products';
 import { ProductCard } from './ProductCard';
 import { Button } from './ui/button';
 
 const categories = [
-  { id: 'all', name: 'All Items', emoji: '🍽️' },
-  { id: 'pizza', name: 'Pizza', emoji: '🍕' },
-  { id: 'burger', name: 'Burgers', emoji: '🍔' },
-  { id: 'sushi', name: 'Sushi', emoji: '🍣' },
-  { id: 'salad', name: 'Salads', emoji: '🥗' },
-  { id: 'ramen', name: 'Ramen', emoji: '🍜' },
-  { id: 'dessert', name: 'Desserts', emoji: '🍰' }
+  { id: 'sandwich', name: 'Sandwich', icon: Sandwich },
+  { id: 'salad', name: 'Salad', icon: Salad },
+  { id: 'potato', name: 'Potato', icon: Potato },
+];
+
+// Mock drink icon since lucide doesn't have a drink icon in our allowed list
+const DrinkIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 12V6a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v6"></path>
+    <path d="M5 12l1.5 6h11l1.5-6"></path>
+  </svg>
+);
+
+const allCategories = [
+  ...categories,
+  { id: 'drink', name: 'Drink', icon: DrinkIcon }
 ];
 
 export const ProductCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('sandwich');
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [currentX, setCurrentX] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
 
-  const filteredProducts = selectedCategory === 'all' 
-    ? products 
-    : products.filter(product => 
-        product.name.toLowerCase().includes(selectedCategory) ||
-        (selectedCategory === 'pizza' && product.name.toLowerCase().includes('pizza')) ||
-        (selectedCategory === 'burger' && product.name.toLowerCase().includes('burger')) ||
-        (selectedCategory === 'sushi' && product.name.toLowerCase().includes('sushi')) ||
-        (selectedCategory === 'salad' && product.name.toLowerCase().includes('salad')) ||
-        (selectedCategory === 'ramen' && product.name.toLowerCase().includes('ramen')) ||
-        (selectedCategory === 'dessert' && product.name.toLowerCase().includes('cake'))
-      );
+  const filteredProducts = products.filter(product => 
+    product.name.toLowerCase().includes(selectedCategory) ||
+    (selectedCategory === 'sandwich' && product.name.toLowerCase().includes('sandwich')) ||
+    (selectedCategory === 'salad' && product.name.toLowerCase().includes('salad')) ||
+    (selectedCategory === 'potato' && product.name.toLowerCase().includes('potato')) ||
+    (selectedCategory === 'drink' && (product.name.toLowerCase().includes('drink') || product.name.toLowerCase().includes('juice') || product.name.toLowerCase().includes('soda')))
+  );
 
   useEffect(() => {
     if (!isAutoPlaying || isDragging) return;
@@ -53,11 +58,6 @@ export const ProductCarousel = () => {
 
   const prevSlide = () => {
     setCurrentIndex((prev) => (prev - 1 + filteredProducts.length) % filteredProducts.length);
-    setIsAutoPlaying(false);
-  };
-
-  const goToSlide = (index: number) => {
-    setCurrentIndex(index);
     setIsAutoPlaying(false);
   };
 
@@ -102,27 +102,26 @@ export const ProductCarousel = () => {
   return (
     <section className="flex-1 flex flex-col px-4 py-8">
       {/* Category Filter */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
-          Our Menu
-        </h2>
-        
-        <div className="flex overflow-x-auto space-x-3 pb-4 scrollbar-hide">
-          {categories.map((category) => (
-            <Button
-              key={category.id}
-              variant={selectedCategory === category.id ? "default" : "outline"}
-              className={`flex-shrink-0 rounded-full px-6 py-3 transition-all duration-300 ${
-                selectedCategory === category.id 
-                  ? 'bg-gradient-to-r from-orange-400 to-orange-600 shadow-lg scale-105' 
-                  : 'hover:scale-105 hover:shadow-md'
-              }`}
-              onClick={() => handleCategoryChange(category.id)}
-            >
-              <span className="mr-2">{category.emoji}</span>
-              {category.name}
-            </Button>
-          ))}
+      <div className="mb-8 flex justify-center">
+        <div className="flex space-x-4">
+          {allCategories.map((category) => {
+            const IconComponent = category.icon;
+            return (
+              <Button
+                key={category.id}
+                variant={selectedCategory === category.id ? "default" : "outline"}
+                size="sm"
+                className={`rounded-full w-12 h-12 p-0 transition-all duration-300 ${
+                  selectedCategory === category.id 
+                    ? 'bg-black text-white shadow-lg scale-110' 
+                    : 'bg-white/80 backdrop-blur-sm text-black hover:bg-white hover:scale-105 hover:shadow-md border-black/20'
+                }`}
+                onClick={() => handleCategoryChange(category.id)}
+              >
+                <IconComponent className="h-5 w-5" />
+              </Button>
+            );
+          })}
         </div>
       </div>
       
@@ -130,10 +129,10 @@ export const ProductCarousel = () => {
         <Button
           variant="outline"
           size="icon"
-          className="absolute left-4 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full w-12 h-12 backdrop-blur-sm border-orange-200 hover:border-orange-300 transition-all duration-300 hover:scale-110"
+          className="absolute left-4 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full w-12 h-12 backdrop-blur-sm border-black/20 hover:border-black/40 transition-all duration-300 hover:scale-110"
           onClick={prevSlide}
         >
-          <ChevronLeft className="h-5 w-5 text-orange-600" />
+          <ChevronLeft className="h-5 w-5 text-black" />
         </Button>
 
         <div 
@@ -170,10 +169,10 @@ export const ProductCarousel = () => {
         <Button
           variant="outline"
           size="icon"
-          className="absolute right-4 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full w-12 h-12 backdrop-blur-sm border-orange-200 hover:border-orange-300 transition-all duration-300 hover:scale-110"
+          className="absolute right-4 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full w-12 h-12 backdrop-blur-sm border-black/20 hover:border-black/40 transition-all duration-300 hover:scale-110"
           onClick={nextSlide}
         >
-          <ChevronRight className="h-5 w-5 text-orange-600" />
+          <ChevronRight className="h-5 w-5 text-black" />
         </Button>
       </div>
 
@@ -184,18 +183,18 @@ export const ProductCarousel = () => {
             key={index}
             className={`w-3 h-3 rounded-full transition-all duration-300 ${
               index === currentIndex 
-                ? 'bg-gradient-to-r from-orange-400 to-orange-600 scale-125 shadow-lg' 
-                : 'bg-gray-300 hover:bg-gray-400'
+                ? 'bg-black scale-125 shadow-lg' 
+                : 'bg-black/30 hover:bg-black/60'
             }`}
-            onClick={() => goToSlide(index)}
+            onClick={() => setCurrentIndex(index)}
           />
         ))}
       </div>
 
       {/* Progress Bar */}
-      <div className="w-32 mx-auto mt-4 h-1 bg-gray-200 rounded-full overflow-hidden">
+      <div className="w-32 mx-auto mt-4 h-1 bg-black/20 rounded-full overflow-hidden">
         <div 
-          className="h-full bg-gradient-to-r from-orange-400 to-orange-600 transition-all duration-4000 ease-linear"
+          className="h-full bg-black transition-all duration-4000 ease-linear"
           style={{ 
             width: isAutoPlaying && !isDragging ? '100%' : '0%',
             transitionDuration: isAutoPlaying && !isDragging ? '4000ms' : '300ms'
