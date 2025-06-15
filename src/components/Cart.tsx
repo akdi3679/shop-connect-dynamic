@@ -1,4 +1,3 @@
-
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,27 +15,25 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="flex flex-col bg-white/90 backdrop-blur-lg border-l border-white/30 shadow-2xl w-full sm:max-w-sm">
-        <SheetHeader className="pb-4 flex flex-row items-center justify-between">
+      <SheetContent className="flex flex-col bg-white/70 backdrop-blur-xl border-l border-white/20 shadow-2xl w-full sm:max-w-sm">
+        <SheetHeader className="pb-4 relative">
           <SheetTitle className="text-xl font-bold text-black">Your Cart</SheetTitle>
-          <div className="flex items-center gap-3">
-            {cartItems.length > 0 && (
-              <Button 
-                variant="ghost" 
-                onClick={clearCart}
-                className="text-sm font-medium text-black hover:text-red-600 hover:bg-red-50 px-2 py-1 h-auto"
-              >
-                Clear
-              </Button>
-            )}
-          </div>
+          {cartItems.length > 0 && (
+            <Button 
+              variant="ghost" 
+              onClick={clearCart}
+              className="absolute top-0 right-12 text-sm font-medium text-black hover:text-red-600 hover:bg-red-50 hover:rounded-lg px-2 py-1 h-auto transition-all duration-200"
+            >
+              Clear
+            </Button>
+          )}
         </SheetHeader>
         {cartItems.length > 0 ? (
           <>
             <ScrollArea className="flex-grow pr-4">
               <div className="space-y-4">
                 {cartItems.map((item) => (
-                  <div key={item.id} className="flex items-center space-x-4 bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-white/30">
+                  <div key={item.id} className="flex items-center space-x-4 bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/30">
                     <img src={item.image} alt={item.name} className="h-16 w-16 rounded-xl object-cover shadow-sm" />
                     <div className="flex-grow">
                       <p className="font-semibold text-black">{item.name}</p>
@@ -65,7 +62,7 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
             </ScrollArea>
             <SheetFooter className="mt-auto pt-4 border-t border-white/20">
               <div className="w-full space-y-4">
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-white/30">
+                <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/30">
                   <div className="flex justify-between font-bold text-xl text-black">
                     <span>Total</span>
                     <span>د {cartTotal.toFixed(2)}</span>
@@ -85,7 +82,7 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
             </SheetFooter>
           </>
         ) : (
-          <div className="flex-grow flex flex-col items-center justify-center text-center bg-white/80 backdrop-blur-sm rounded-xl p-8 m-4 border border-white/30">
+          <div className="flex-grow flex flex-col items-center justify-center text-center bg-white/60 backdrop-blur-sm rounded-xl p-8 m-4 border border-white/30">
             <p className="text-lg font-semibold text-black">Your cart is empty</p>
             <p className="text-gray-600 mt-2">Add some delicious items to get started!</p>
           </div>
