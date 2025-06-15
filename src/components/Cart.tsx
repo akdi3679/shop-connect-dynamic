@@ -1,10 +1,12 @@
 
+import { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { X, Hand } from 'lucide-react';
+import { SignaturePad } from '@/components/SignaturePad';
 
 interface CartProps {
   isOpen: boolean;
@@ -12,15 +14,17 @@ interface CartProps {
 }
 
 const CurrencyIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg" className="inline-block">
+  <svg width="24" height="24" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg" className="inline-block">
     <text x="40" y="95" fontSize="80" fontFamily="Amiri, serif" direction="rtl">&#x062F;</text>
-    <text x="15" y="60" fontSize="50" fontFamily="Amiri, serif" transform="rotate(90 15,60)">ا</text>
-    <text x="15" y="64" fontSize="50" fontFamily="Amiri, serif" transform="rotate(90 15,64)">ا</text>
+    <text x="15" y="58" fontSize="50" fontFamily="Amiri, serif" transform="rotate(90 15,58)">ا</text>
+    <text x="15" y="65" fontSize="50" fontFamily="Amiri, serif" transform="rotate(90 15,65)">ا</text>
   </svg>
 );
 
 export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
   const { cartItems, removeFromCart, updateQuantity, clearCart, cartTotal } = useCart();
+  const [showSignature, setShowSignature] = useState(false);
+  const [signature, setSignature] = useState<string | null>(null);
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -92,6 +96,34 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
                       <Hand className="h-3 w-3" />
                       <span className="font-script italic">Premium Quality</span>
                     </div>
+                  </div>
+                  
+                  {/* Signature Section */}
+                  <div className="mt-3 pt-3 border-t border-white/20">
+                    <div className="flex items-center justify-between">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setShowSignature(!showSignature)}
+                        className="text-xs h-6 px-2 text-gray-600 hover:text-black"
+                      >
+                        Sign
+                      </Button>
+                      {signature && (
+                        <div className="w-16 h-8 border border-gray-200 rounded bg-white">
+                          <img src={signature} alt="Signature" className="w-full h-full object-contain" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    {showSignature && (
+                      <div className="mt-2">
+                        <SignaturePad 
+                          onSignatureChange={setSignature}
+                          onClose={() => setShowSignature(false)}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
                 <Button className="w-full rounded-xl bg-black hover:bg-gray-800 text-white font-semibold py-3">
