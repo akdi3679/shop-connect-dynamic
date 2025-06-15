@@ -122,9 +122,20 @@ export const ProductCarousel = () => {
   };
 
   return (
-    <section className="flex-1 flex flex-col px-4 py-4">
+    <section className="flex-1 flex flex-col px-4 py-2 relative">
+      {/* Fortnite-style indicator on left side */}
+      <div className="fixed left-4 top-1/2 transform -translate-y-1/2 z-50">
+        <div className="bg-black/80 backdrop-blur-sm text-white px-4 py-3 rounded-2xl border border-yellow-400/30 shadow-lg">
+          <div className="text-center">
+            <span className="text-2xl font-black tracking-wider text-yellow-400 drop-shadow-lg" style={{ fontFamily: 'Impact, "Arial Black", sans-serif', textShadow: '0 0 10px rgba(255, 255, 0, 0.5)' }}>
+              {currentIndex + 1}/{filteredProducts.length}
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Category Filter */}
-      <div className="mb-6 flex justify-center">
+      <div className="mb-4 flex justify-center">
         <div className="flex space-x-4">
           {categories.map((category) => {
             const IconComponent = category.icon;
@@ -148,7 +159,7 @@ export const ProductCarousel = () => {
         </div>
       </div>
       
-      <div className="flex-1 relative flex items-center justify-center mb-8">
+      <div className="flex-1 relative flex items-start justify-center pt-8">
         <div 
           ref={carouselRef}
           className="w-full max-w-md mx-auto cursor-grab active:cursor-grabbing relative z-10"
@@ -202,7 +213,7 @@ export const ProductCarousel = () => {
       </div>
 
       {/* Dots Indicator */}
-      <div className="flex justify-center space-x-2 mt-2">
+      <div className="flex justify-center space-x-2 mt-4">
         {filteredProducts.map((_, index) => (
           <button
             key={index}
@@ -217,7 +228,7 @@ export const ProductCarousel = () => {
       </div>
 
       {/* Progress Bar */}
-      <div className="w-32 mx-auto mt-4 h-1 bg-black/20 rounded-full overflow-hidden">
+      <div className="w-32 mx-auto mt-4 h-1 bg-black/20 rounded-full overflow-hidden mb-4">
         <div 
           className="h-full bg-black transition-all duration-4000 ease-linear"
           style={{ 
