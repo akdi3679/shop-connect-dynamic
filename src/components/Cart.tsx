@@ -1,4 +1,3 @@
-
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,28 +15,18 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="flex flex-col bg-white/80 backdrop-blur-xl border-l border-white/30 shadow-2xl w-full sm:max-w-sm rounded-l-3xl">
+      <SheetContent className="flex flex-col bg-white/70 backdrop-blur-xl border-l border-white/20 shadow-2xl w-full sm:max-w-sm">
         <SheetHeader className="pb-4 relative">
           <SheetTitle className="text-xl font-bold text-black">Your Cart</SheetTitle>
-          <div className="absolute top-0 right-0 flex items-center gap-2">
-            {cartItems.length > 0 && (
-              <Button 
-                variant="ghost" 
-                onClick={clearCart}
-                className="text-sm font-medium text-black hover:text-red-600 hover:bg-red-50 hover:rounded-lg px-2 py-1 h-auto transition-all duration-200"
-              >
-                Clear
-              </Button>
-            )}
+          {cartItems.length > 0 && (
             <Button 
               variant="ghost" 
-              size="icon" 
-              onClick={() => onOpenChange(false)}
-              className="rounded-full hover:bg-gray-100 text-black h-8 w-8"
+              onClick={clearCart}
+              className="absolute top-0 right-12 text-sm font-medium text-black hover:text-red-600 hover:bg-red-50 hover:rounded-lg px-2 py-1 h-auto transition-all duration-200"
             >
-              <X className="h-4 w-4" />
+              Clear
             </Button>
-          </div>
+          )}
         </SheetHeader>
         {cartItems.length > 0 ? (
           <>
@@ -55,7 +44,7 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
                           min="1"
                           value={item.quantity}
                           onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
-                          className="h-8 w-16 rounded-lg bg-transparent border-white/30 text-black"
+                          className="h-8 w-16 rounded-lg bg-white/80 border-white/30 text-black"
                         />
                       </div>
                     </div>
