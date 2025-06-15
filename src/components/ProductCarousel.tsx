@@ -1,17 +1,21 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Sandwich, Salad, Potato } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sandwich, Salad } from 'lucide-react';
 import { products } from '@/data/products';
 import { ProductCard } from './ProductCard';
 import { Button } from './ui/button';
 
-const categories = [
-  { id: 'sandwich', name: 'Sandwich', icon: Sandwich },
-  { id: 'salad', name: 'Salad', icon: Salad },
-  { id: 'potato', name: 'Potato', icon: Potato },
-];
+// Custom Potato Icon since lucide doesn't have one
+const PotatoIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <ellipse cx="12" cy="12" rx="7" ry="5" transform="rotate(-15 12 12)"/>
+    <circle cx="10" cy="10" r="0.5" fill="currentColor"/>
+    <circle cx="14" cy="13" r="0.5" fill="currentColor"/>
+    <circle cx="11" cy="14" r="0.5" fill="currentColor"/>
+  </svg>
+);
 
-// Mock drink icon since lucide doesn't have a drink icon in our allowed list
+// Custom Drink Icon
 const DrinkIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M5 12V6a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v6"></path>
@@ -19,8 +23,10 @@ const DrinkIcon = () => (
   </svg>
 );
 
-const allCategories = [
-  ...categories,
+const categories = [
+  { id: 'sandwich', name: 'Sandwich', icon: Sandwich },
+  { id: 'salad', name: 'Salad', icon: Salad },
+  { id: 'potato', name: 'Potato', icon: PotatoIcon },
   { id: 'drink', name: 'Drink', icon: DrinkIcon }
 ];
 
