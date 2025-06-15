@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Sandwich, Salad } from 'lucide-react';
 import { products } from '@/data/products';
@@ -123,14 +122,12 @@ export const ProductCarousel = () => {
 
   return (
     <section className="flex-1 flex flex-col px-4 py-2 relative">
-      {/* Fortnite-style indicator on left side */}
+      {/* Smaller indicator with black text and no background */}
       <div className="fixed left-4 top-1/2 transform -translate-y-1/2 z-50">
-        <div className="bg-black/80 backdrop-blur-sm text-white px-4 py-3 rounded-2xl border border-yellow-400/30 shadow-lg">
-          <div className="text-center">
-            <span className="text-2xl font-black tracking-wider text-yellow-400 drop-shadow-lg" style={{ fontFamily: 'Impact, "Arial Black", sans-serif', textShadow: '0 0 10px rgba(255, 255, 0, 0.5)' }}>
-              {currentIndex + 1}/{filteredProducts.length}
-            </span>
-          </div>
+        <div className="text-black">
+          <span className="text-lg font-bold">
+            {currentIndex + 1}/{filteredProducts.length}
+          </span>
         </div>
       </div>
 

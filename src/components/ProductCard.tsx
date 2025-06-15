@@ -21,12 +21,12 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     soundManager.play('addToCart');
     
     toast.success(
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-3 bg-white rounded-lg p-2">
         <div className="w-12 h-12 rounded-lg overflow-hidden">
           <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
         </div>
         <div>
-          <p className="font-semibold">{product.name}</p>
+          <p className="font-semibold text-black">{product.name}</p>
           <p className="text-sm text-gray-600">Added to cart! 🛒</p>
         </div>
       </div>
@@ -56,13 +56,13 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         
-        {/* Price badge */}
-        <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-sm text-white rounded-full px-4 py-2 border border-white/20">
+        {/* Price badge - positioned bottom right above the name */}
+        <div className="absolute bottom-12 right-4 bg-black/80 backdrop-blur-sm text-white rounded-full px-3 py-1 border border-white/20">
           <span className="text-sm font-bold">${product.price.toFixed(2)}</span>
         </div>
 
-        {/* Product name with gradient glass effect */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm text-white p-4 rounded-b-3xl">
+        {/* Product name with gradient black to transparent glass effect */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent backdrop-blur-md text-white p-4">
           <h3 className="text-lg font-bold text-white">{product.name}</h3>
         </div>
 
