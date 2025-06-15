@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -68,6 +69,9 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(circle at center, var(--tw-gradient-stops))',
+			},
 			keyframes: {
 				'accordion-down': {
 					from: {
@@ -84,11 +88,51 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fadeIn': {
+					'0%': {
+						opacity: '0',
+						transform: 'scale(0.95)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'scale(1)'
+					}
+				},
+				'productAppear': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(20px) scale(0.9)'
+					},
+					'50%': {
+						opacity: '0.7',
+						transform: 'translateY(-5px) scale(0.95)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0) scale(1)'
+					}
+				},
+				'slideSpeedLines': {
+					'0%': {
+						transform: 'translateX(-100%)',
+						opacity: '0'
+					},
+					'50%': {
+						opacity: '1'
+					},
+					'100%': {
+						transform: 'translateX(100%)',
+						opacity: '0'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fadeIn': 'fadeIn 0.8s ease-out 0.3s forwards',
+				'productAppear': 'productAppear 0.6s ease-out 0.2s both',
+				'slideSpeedLines': 'slideSpeedLines 0.5s ease-out'
 			}
 		}
 	},

@@ -1,5 +1,6 @@
+
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Sandwich, Salad } from 'lucide-react';
+import { Sandwich, Salad } from 'lucide-react';
 import { products } from '@/data/products';
 import { ProductCard } from './ProductCard';
 import { Button } from './ui/button';
@@ -34,6 +35,7 @@ export const ProductCarousel = () => {
   const [selectedCategory, setSelectedCategory] = useState('sandwich');
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
+  const [isSliding, setIsSliding] = useState(false);
   const [startX, setStartX] = useState(0);
   const [currentX, setCurrentX] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -57,13 +59,17 @@ export const ProductCarousel = () => {
   }, [isAutoPlaying, isDragging, filteredProducts.length]);
 
   const nextSlide = () => {
+    setIsSliding(true);
     setCurrentIndex((prev) => (prev + 1) % filteredProducts.length);
     setIsAutoPlaying(false);
+    setTimeout(() => setIsSliding(false), 500);
   };
 
   const prevSlide = () => {
+    setIsSliding(true);
     setCurrentIndex((prev) => (prev - 1 + filteredProducts.length) % filteredProducts.length);
     setIsAutoPlaying(false);
+    setTimeout(() => setIsSliding(false), 500);
   };
 
   // Touch and mouse handlers
@@ -104,21 +110,33 @@ export const ProductCarousel = () => {
     setIsAutoPlaying(true);
   };
 
+  // Get background gradient based on category
+  const getCategoryBackground = (categoryId: string) => {
+    switch (categoryId) {
+      case 'sandwich': return 'from-amber-500/20 to-orange-500/20';
+      case 'salad': return 'from-green-500/20 to-emerald-500/20';
+      case 'potato': return 'from-yellow-500/20 to-amber-500/20';
+      case 'drink': return 'from-blue-500/20 to-cyan-500/20';
+      default: return 'from-gray-500/20 to-gray-600/20';
+    }
+  };
+
   return (
-    <section className="flex-1 flex flex-col px-4 py-8">
+    <section className="flex-1 flex flex-col px-4 py-4">
       {/* Category Filter */}
-      <div className="mb-8 flex justify-center">
+      <div className="mb-6 flex justify-center">
         <div className="flex space-x-4">
           {categories.map((category) => {
             const IconComponent = category.icon;
+            const isSelected = selectedCategory === category.id;
             return (
               <Button
                 key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
+                variant={isSelected ? "default" : "outline"}
                 size="sm"
                 className={`rounded-full w-12 h-12 p-0 transition-all duration-300 ${
-                  selectedCategory === category.id 
-                    ? 'bg-black text-white shadow-lg scale-110' 
+                  isSelected 
+                    ? 'bg-black text-white shadow-lg scale-110 hover:bg-black hover:text-white' 
                     : 'bg-white/80 backdrop-blur-sm text-black hover:bg-white hover:scale-105 hover:shadow-md border-black/20'
                 }`}
                 onClick={() => handleCategoryChange(category.id)}
@@ -130,19 +148,24 @@ export const ProductCarousel = () => {
         </div>
       </div>
       
-      <div className="flex-1 relative flex items-center justify-center">
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute left-4 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full w-12 h-12 backdrop-blur-sm border-black/20 hover:border-black/40 transition-all duration-300 hover:scale-110"
-          onClick={prevSlide}
-        >
-          <ChevronLeft className="h-5 w-5 text-black" />
-        </Button>
+      <div className="flex-1 relative flex items-center justify-center mb-8">
+        {/* Animated background based on selected category */}
+        <div 
+          className={`absolute inset-0 bg-gradient-radial ${getCategoryBackground(selectedCategory)} rounded-3xl transition-all duration-1000 ease-out opacity-0 animate-[fadeIn_0.8s_ease-out_0.3s_forwards] blur-xl scale-110`}
+        />
+        
+        {/* Speed lines effect during sliding */}
+        {isSliding && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[slideSpeedLines_0.5s_ease-out] transform translate-x-[-100%]" />
+            <div className="absolute top-1/4 left-0 right-0 h-px bg-white/20 animate-[slideSpeedLines_0.5s_ease-out_0.1s] transform translate-x-[-100%]" />
+            <div className="absolute top-3/4 left-0 right-0 h-px bg-white/20 animate-[slideSpeedLines_0.5s_ease-out_0.2s] transform translate-x-[-100%]" />
+          </div>
+        )}
 
         <div 
           ref={carouselRef}
-          className="w-full max-w-md mx-auto cursor-grab active:cursor-grabbing"
+          className="w-full max-w-md mx-auto cursor-grab active:cursor-grabbing relative z-10"
           onMouseDown={(e) => handleStart(e.clientX)}
           onMouseMove={(e) => handleMove(e.clientX)}
           onMouseUp={handleEnd}
@@ -152,7 +175,7 @@ export const ProductCarousel = () => {
           onTouchEnd={handleEnd}
         >
           <div 
-            className="flex transition-transform duration-500 ease-out"
+            className={`flex transition-all duration-500 ease-out ${isSliding ? 'blur-sm' : ''}`}
             style={{ 
               transform: `translateX(-${currentIndex * 100}%)${isDragging ? ` translateX(${(currentX - startX) * 0.5}px)` : ''}` 
             }}
@@ -161,8 +184,12 @@ export const ProductCarousel = () => {
               <div key={product.id} className="w-full flex-shrink-0 px-4">
                 <div className={`transition-all duration-500 ${
                   index === currentIndex 
-                    ? 'scale-100 opacity-100' 
-                    : 'scale-95 opacity-70'
+                    ? 'scale-100 opacity-100 animate-[productAppear_0.6s_ease-out_0.2s_both]' 
+                    : index === currentIndex - 1 || (currentIndex === 0 && index === filteredProducts.length - 1)
+                    ? 'scale-90 opacity-40 translate-x-4 blur-[1px]'
+                    : index === currentIndex + 1 || (currentIndex === filteredProducts.length - 1 && index === 0)
+                    ? 'scale-90 opacity-40 -translate-x-4 blur-[1px]'
+                    : 'scale-85 opacity-20'
                 }`}>
                   <ProductCard product={product} />
                 </div>
@@ -170,19 +197,10 @@ export const ProductCarousel = () => {
             ))}
           </div>
         </div>
-
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute right-4 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full w-12 h-12 backdrop-blur-sm border-black/20 hover:border-black/40 transition-all duration-300 hover:scale-110"
-          onClick={nextSlide}
-        >
-          <ChevronRight className="h-5 w-5 text-black" />
-        </Button>
       </div>
 
       {/* Dots Indicator */}
-      <div className="flex justify-center space-x-2 mt-6">
+      <div className="flex justify-center space-x-2 mt-2">
         {filteredProducts.map((_, index) => (
           <button
             key={index}
