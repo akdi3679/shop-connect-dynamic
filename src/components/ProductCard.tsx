@@ -11,11 +11,11 @@ interface ProductCardProps {
   product: Product;
 }
 
-const CurrencyIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg" className="inline-block">
-    <text x="40" y="95" fontSize="80" fontFamily="Amiri, serif" direction="rtl">&#x062F;</text>
-    <text x="15" y="58" fontSize="50" fontFamily="Amiri, serif" transform="rotate(90 15,58)">ا</text>
-    <text x="15" y="65" fontSize="50" fontFamily="Amiri, serif" transform="rotate(90 15,65)">ا</text>
+const CurrencyIcon = ({ className = "w-5 h-5", color = "currentColor" }: { className?: string; color?: string }) => (
+  <svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg" className={className} style={{ color }}>
+    <text x="40" y="95" fontSize="80" fontFamily="Amiri, serif" direction="rtl" fill="currentColor">&#x062F;</text>
+    <text x="15" y="58" fontSize="50" fontFamily="Amiri, serif" transform="rotate(90 15,58)" fill="currentColor">ا</text>
+    <text x="15" y="65" fontSize="50" fontFamily="Amiri, serif" transform="rotate(90 15,65)" fill="currentColor">ا</text>
   </svg>
 );
 
@@ -78,7 +78,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         
         {/* Price badge - positioned higher above the name */}
         <div className="absolute bottom-20 right-4 bg-black/80 backdrop-blur-sm text-white rounded-full px-3 py-1 border border-white/20 flex items-center gap-1">
-          <CurrencyIcon />
+          <CurrencyIcon className="w-6 h-6" color="#ffffff" />
           <span className="text-sm font-bold">{product.price.toFixed(2)}</span>
         </div>
 

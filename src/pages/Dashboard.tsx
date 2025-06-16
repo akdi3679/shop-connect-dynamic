@@ -3,13 +3,14 @@ import {
   BarChart3, Package, Users, Settings, LogOut, Home, User, 
   MessageSquare, Bell, TrendingUp, Calendar, DollarSign, 
   ShoppingCart, Eye, Filter, Search, Plus, MoreVertical,
-  Mail, Phone, MapPin, Clock, Star, Target, Activity
+  Mail, Phone, MapPin, Clock, Star, Target, Activity, Upload, Save, Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { ProductManagement } from '@/components/ProductManagement';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -18,6 +19,7 @@ const Dashboard = () => {
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'orders', label: 'Orders', icon: Package },
+    { id: 'products', label: 'Products', icon: Package, adminOnly: true },
     { id: 'messages', label: 'Messages', icon: MessageSquare },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp },
@@ -217,6 +219,10 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           </div>
+        )}
+
+        {activeTab === 'products' && user?.role === 'admin' && (
+          <ProductManagement />
         )}
 
         {activeTab === 'messages' && (
