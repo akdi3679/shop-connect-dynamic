@@ -11,7 +11,7 @@ interface ProductCardProps {
   product: Product;
 }
 
-const CurrencyIcon = ({ className = "w-5 h-5", color = "currentColor" }: { className?: string; color?: string }) => (
+const CurrencyIcon = ({ className = "w-20 h-20", color = "currentColor" }: { className?: string; color?: string }) => (
   <svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg" className={className} style={{ color }}>
     <text x="40" y="95" fontSize="80" fontFamily="Amiri, serif" direction="rtl" fill="currentColor">&#x062F;</text>
     <text x="15" y="58" fontSize="50" fontFamily="Amiri, serif" transform="rotate(90 15,58)" fill="currentColor">ا</text>

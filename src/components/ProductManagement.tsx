@@ -4,37 +4,27 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Upload, Save, Trash2, Edit, Package, Tag, Percent } from 'lucide-react';
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  description: string;
-  image: string;
-  category: string;
-  reduction?: number;
-}
-
-interface Category {
-  id: number;
-  name: string;
-  icon: string;
-  reduction?: number;
-}
+import { Plus, Save, Trash2, Edit, Package, Tag, Percent } from 'lucide-react';
+import { useProducts } from '@/contexts/ProductContext';
+import { toast } from 'sonner';
 
 export const ProductManagement = () => {
-  const [activeSection, setActiveSection] = useState('products');
-  const [products, setProducts] = useState<Product[]>([
-    { id: 1, name: 'Gourmet Burger', price: 12.99, description: 'Delicious beef burger', image: '/placeholder.svg', category: 'Burgers' },
-    { id: 2, name: 'Caesar Salad', price: 8.99, description: 'Fresh caesar salad', image: '/placeholder.svg', category: 'Salads' },
-  ]);
+  const { 
+    products, 
+    categories, 
+    addProduct, 
+    deleteProduct, 
+    addCategory, 
+    deleteCategory,
+    updateProduct,
+    updateCategory 
+  } = useProducts();
   
-  const [categories, setCategories] = useState<Category[]>([
-    { id: 1, name: 'Burgers', icon: '🍔' },
-    { id: 2, name: 'Salads', icon: '🥗' },
-    { id: 3, name: 'Drinks', icon: '🥤' },
-  ]);
+  const [activeSection, setActiveSection] = useState('products');
+  const [showProductForm, setShowProductForm] = useState(false);
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<number | null>(null);
+  const [editingCategory, setEditingCategory] = useState<number | null>(null);
 
   // New product form state
   const [newProduct, setNewProduct] = useState({
@@ -53,46 +43,62 @@ export const ProductManagement = () => {
     reduction: ''
   });
 
-  const [showProductForm, setShowProductForm] = useState(false);
-  const [showCategoryForm, setShowCategoryForm] = useState(false);
-
   const handleAddProduct = () => {
     if (newProduct.name && newProduct.price && newProduct.category) {
-      const product: Product = {
-        id: Date.now(),
+      addProduct({
         name: newProduct.name,
         price: parseFloat(newProduct.price),
         description: newProduct.description,
-        image: newProduct.image || '/placeholder.svg',
+        image: newProduct.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&h=300&fit=crop',
         category: newProduct.category,
         reduction: newProduct.reduction ? parseFloat(newProduct.reduction) : undefined
-      };
-      setProducts([...products, product]);
+      });
       setNewProduct({ name: '', price: '', description: '', image: '', category: '', reduction: '' });
       setShowProductForm(false);
+      toast.success('Product added successfully!');
+    } else {
+      toast.error('Please fill in all required fields');
     }
   };
 
   const handleAddCategory = () => {
     if (newCategory.name && newCategory.icon) {
-      const category: Category = {
-        id: Date.now(),
+      addCategory({
         name: newCategory.name,
         icon: newCategory.icon,
         reduction: newCategory.reduction ? parseFloat(newCategory.reduction) : undefined
-      };
-      setCategories([...categories, category]);
+      });
       setNewCategory({ name: '', icon: '', reduction: '' });
       setShowCategoryForm(false);
+      toast.success('Category added successfully!');
+    } else {
+      toast.error('Please fill in all required fields');
     }
   };
 
-  const deleteProduct = (id: number) => {
-    setProducts(products.filter(p => p.id !== id));
+  const handleDeleteProduct = (id: number) => {
+    deleteProduct(id);
+    toast.success('Product deleted successfully!');
   };
 
-  const deleteCategory = (id: number) => {
-    setCategories(categories.filter(c => c.id !== id));
+  const handleDeleteCategory = (id: number) => {
+    deleteCategory(id);
+    toast.success('Category deleted successfully!');
+  };
+
+  const handleApplyReduction = (type: 'product' | 'category', id: number, reduction: string) => {
+    const reductionValue = parseFloat(reduction);
+    if (isNaN(reductionValue) || reductionValue < 0 || reductionValue > 100) {
+      toast.error('Please enter a valid reduction percentage (0-100)');
+      return;
+    }
+
+    if (type === 'product') {
+      updateProduct(id, { reduction: reductionValue });
+    } else {
+      updateCategory(id, { reduction: reductionValue });
+    }
+    toast.success(`Reduction applied successfully!`);
   };
 
   const sections = [
@@ -129,7 +135,7 @@ export const ProductManagement = () => {
       {activeSection === 'products' && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-semibold text-black">Products</h3>
+            <h3 className="text-xl font-semibold text-black">Products ({products.length})</h3>
             <Button 
               onClick={() => setShowProductForm(!showProductForm)}
               className="bg-black hover:bg-gray-800 text-white rounded-xl"
@@ -148,14 +154,15 @@ export const ProductManagement = () => {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
-                    placeholder="Product Name"
+                    placeholder="Product Name *"
                     value={newProduct.name}
                     onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
                     className="rounded-xl"
                   />
                   <Input
-                    placeholder="Price"
+                    placeholder="Price *"
                     type="number"
+                    step="0.01"
                     value={newProduct.price}
                     onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
                     className="rounded-xl"
@@ -171,14 +178,16 @@ export const ProductManagement = () => {
                     onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
                     className="rounded-xl border border-gray-300 px-3 py-2"
                   >
-                    <option value="">Select Category</option>
+                    <option value="">Select Category *</option>
                     {categories.map(cat => (
-                      <option key={cat.id} value={cat.name}>{cat.name}</option>
+                      <option key={cat.id} value={cat.name}>{cat.icon} {cat.name}</option>
                     ))}
                   </select>
                   <Input
                     placeholder="Reduction % (optional)"
                     type="number"
+                    min="0"
+                    max="100"
                     value={newProduct.reduction}
                     onChange={(e) => setNewProduct({...newProduct, reduction: e.target.value})}
                     className="rounded-xl"
@@ -214,20 +223,17 @@ export const ProductManagement = () => {
                   <h4 className="font-semibold text-black mb-2">{product.name}</h4>
                   <p className="text-sm text-gray-600 mb-2">{product.description}</p>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="font-bold text-black">${product.price}</span>
+                    <span className="font-bold text-black">${product.price.toFixed(2)}</span>
                     <Badge className="bg-gray-100 text-black">{product.category}</Badge>
                   </div>
                   {product.reduction && (
                     <Badge className="bg-red-100 text-red-800 mb-2">-{product.reduction}%</Badge>
                   )}
                   <div className="flex space-x-2">
-                    <Button size="sm" variant="outline" className="rounded-xl">
-                      <Edit className="h-3 w-3" />
-                    </Button>
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      onClick={() => deleteProduct(product.id)}
+                      onClick={() => handleDeleteProduct(product.id)}
                       className="rounded-xl text-red-600 hover:text-red-700"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -244,7 +250,7 @@ export const ProductManagement = () => {
       {activeSection === 'categories' && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-semibold text-black">Categories</h3>
+            <h3 className="text-xl font-semibold text-black">Categories ({categories.length})</h3>
             <Button 
               onClick={() => setShowCategoryForm(!showCategoryForm)}
               className="bg-black hover:bg-gray-800 text-white rounded-xl"
@@ -263,13 +269,13 @@ export const ProductManagement = () => {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Input
-                    placeholder="Category Name"
+                    placeholder="Category Name *"
                     value={newCategory.name}
                     onChange={(e) => setNewCategory({...newCategory, name: e.target.value})}
                     className="rounded-xl"
                   />
                   <Input
-                    placeholder="Icon (emoji)"
+                    placeholder="Icon (emoji) *"
                     value={newCategory.icon}
                     onChange={(e) => setNewCategory({...newCategory, icon: e.target.value})}
                     className="rounded-xl"
@@ -277,6 +283,8 @@ export const ProductManagement = () => {
                   <Input
                     placeholder="Reduction % (optional)"
                     type="number"
+                    min="0"
+                    max="100"
                     value={newCategory.reduction}
                     onChange={(e) => setNewCategory({...newCategory, reduction: e.target.value})}
                     className="rounded-xl"
@@ -302,17 +310,17 @@ export const ProductManagement = () => {
                 <CardContent className="p-4 text-center">
                   <div className="text-4xl mb-2">{category.icon}</div>
                   <h4 className="font-semibold text-black mb-2">{category.name}</h4>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {products.filter(p => p.category === category.name).length} products
+                  </p>
                   {category.reduction && (
                     <Badge className="bg-red-100 text-red-800 mb-2">-{category.reduction}%</Badge>
                   )}
                   <div className="flex space-x-2 justify-center">
-                    <Button size="sm" variant="outline" className="rounded-xl">
-                      <Edit className="h-3 w-3" />
-                    </Button>
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      onClick={() => deleteCategory(category.id)}
+                      onClick={() => handleDeleteCategory(category.id)}
                       className="rounded-xl text-red-600 hover:text-red-700"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -337,10 +345,30 @@ export const ProductManagement = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {products.filter(p => p.reduction).map((product) => (
-                    <div key={product.id} className="flex justify-between items-center p-3 bg-red-50 rounded-xl">
-                      <span className="text-black">{product.name}</span>
-                      <Badge className="bg-red-100 text-red-800">-{product.reduction}%</Badge>
+                  {products.map((product) => (
+                    <div key={product.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                      <div className="flex-1">
+                        <span className="text-black font-medium">{product.name}</span>
+                        {product.reduction && (
+                          <Badge className="bg-red-100 text-red-800 ml-2">-{product.reduction}%</Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          placeholder="0"
+                          defaultValue={product.reduction || ''}
+                          className="w-20 h-8"
+                          onBlur={(e) => {
+                            if (e.target.value) {
+                              handleApplyReduction('product', product.id, e.target.value);
+                            }
+                          }}
+                        />
+                        <span className="text-sm text-gray-500">%</span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -353,10 +381,30 @@ export const ProductManagement = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {categories.filter(c => c.reduction).map((category) => (
-                    <div key={category.id} className="flex justify-between items-center p-3 bg-red-50 rounded-xl">
-                      <span className="text-black">{category.icon} {category.name}</span>
-                      <Badge className="bg-red-100 text-red-800">-{category.reduction}%</Badge>
+                  {categories.map((category) => (
+                    <div key={category.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                      <div className="flex-1">
+                        <span className="text-black font-medium">{category.icon} {category.name}</span>
+                        {category.reduction && (
+                          <Badge className="bg-red-100 text-red-800 ml-2">-{category.reduction}%</Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          placeholder="0"
+                          defaultValue={category.reduction || ''}
+                          className="w-20 h-8"
+                          onBlur={(e) => {
+                            if (e.target.value) {
+                              handleApplyReduction('category', category.id, e.target.value);
+                            }
+                          }}
+                        />
+                        <span className="text-sm text-gray-500">%</span>
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -1,35 +1,41 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import AuthWrapper from "./components/AuthWrapper";
-import NotFound from "./pages/NotFound";
-import { CartProvider } from "./contexts/CartContext";
-import { AuthProvider } from "./contexts/AuthContext";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from '@/components/ui/sonner';
+import { CartProvider } from '@/contexts/CartContext';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ProductProvider } from '@/contexts/ProductContext';
+import Index from '@/pages/Index';
+import Dashboard from '@/pages/Dashboard';
+import NotFound from '@/pages/NotFound';
+import AuthWrapper from '@/components/AuthWrapper';
+import LoadingScreen from '@/components/LoadingScreen';
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
+function App() {
+  return (
+    <AuthProvider>
+      <ProductProvider>
         <CartProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/dashboard" element={<AuthWrapper />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <Router>
+            <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route 
+                  path="/dashboard" 
+                  element={
+                    <AuthWrapper>
+                      <Dashboard />
+                    </AuthWrapper>
+                  } 
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Toaster />
+            </div>
+          </Router>
         </CartProvider>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+      </ProductProvider>
+    </AuthProvider>
+  );
+}
 
 export default App;
