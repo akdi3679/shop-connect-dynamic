@@ -8,7 +8,6 @@ import Index from '@/pages/Index';
 import Dashboard from '@/pages/Dashboard';
 import NotFound from '@/pages/NotFound';
 import AuthWrapper from '@/components/AuthWrapper';
-import LoadingScreen from '@/components/LoadingScreen';
 
 function App() {
   return (
