@@ -12,10 +12,19 @@ interface ProductCardProps {
 }
 
 const CurrencyIcon = ({ className = "w-20 h-20", color = "currentColor" }: { className?: string; color?: string }) => (
-  <svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg" className={className} style={{ color }}>
-    <text x="40" y="95" fontSize="80" fontFamily="Amiri, serif" direction="rtl" fill="currentColor">&#x062F;</text>
-    <text x="15" y="58" fontSize="50" fontFamily="Amiri, serif" transform="rotate(90 15,58)" fill="currentColor">ا</text>
-    <text x="15" y="65" fontSize="50" fontFamily="Amiri, serif" transform="rotate(90 15,65)" fill="currentColor">ا</text>
+  <svg width="2em" height="2em" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ verticalAlign: '-0.5em' }} className={className}>
+    <text
+      x="70" y="80" fontSize="80" fontFamily="Amiri, serif" direction="rtl"
+      fill={color} stroke={color} strokeWidth="2" paintOrder="stroke"
+    >&#x062F;</text>
+    <text
+      x="45" y="42" fontSize="50" fontFamily="Amiri, serif" transform="rotate(90 45,42)"
+      fill={color} stroke={color} strokeWidth="2" paintOrder="stroke"
+    >ا</text>
+    <text
+      x="45" y="50" fontSize="50" fontFamily="Amiri, serif" transform="rotate(90 45,50)"
+      fill={color} stroke={color} strokeWidth="2" paintOrder="stroke"
+    >ا</text>
   </svg>
 );
 
@@ -78,7 +87,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         
         {/* Price badge - positioned higher above the name */}
         <div className="absolute bottom-20 right-4 bg-black/80 backdrop-blur-sm text-white rounded-full px-3 py-1 border border-white/20 flex items-center gap-1">
-          <CurrencyIcon className="w-6 h-6" color="#ffffff" />
+          <CurrencyIcon className="w-8 h-8" color="#ffffff" />
           <span className="text-sm font-bold">{product.price.toFixed(2)}</span>
         </div>
 

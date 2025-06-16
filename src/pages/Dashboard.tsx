@@ -11,10 +11,17 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ProductManagement } from '@/components/ProductManagement';
+import { Analytics } from '@/components/Analytics';
+import { useProducts } from '@/contexts/ProductContext';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const { user, logout } = useAuth();
+  const { messages, markMessageAsRead, addMessage } = useProducts();
+  const [selectedMessage, setSelectedMessage] = useState<number | null>(null);
+  const [newMessageText, setNewMessageText] = useState('');
+
+  const unreadMessages = messages.filter(m => !m.isRead);
 
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
@@ -39,6 +46,21 @@ const Dashboard = () => {
   const filteredMenuItems = menuItems.filter(item => 
     !item.adminOnly || user?.role === 'admin'
   );
+
+  const handleSendMessage = () => {
+    if (newMessageText.trim() && selectedMessage) {
+      // Simulate sending a message back
+      const selectedMsg = messages.find(m => m.id === selectedMessage);
+      if (selectedMsg) {
+        addMessage({
+          customerName: 'Support Team',
+          customerId: 0, // System message
+          message: newMessageText
+        });
+        setNewMessageText('');
+      }
+    }
+  };
 
   return (
     <div className="h-screen flex bg-gradient-to-br from-slate-50 via-white to-gray-50">
@@ -83,8 +105,8 @@ const Dashboard = () => {
               >
                 <Icon className="h-5 w-5" />
                 <span className="font-medium">{item.label}</span>
-                {item.id === 'messages' && (
-                  <Badge className="ml-auto bg-red-500 text-white text-xs">3</Badge>
+                {item.id === 'messages' && unreadMessages.length > 0 && (
+                  <Badge className="ml-auto bg-red-500 text-white text-xs">{unreadMessages.length}</Badge>
                 )}
                 {item.id === 'notifications' && (
                   <Badge className="ml-auto bg-orange-500 text-white text-xs">7</Badge>
@@ -225,13 +247,19 @@ const Dashboard = () => {
           <ProductManagement />
         )}
 
+        {activeTab === 'analytics' && (
+          <Analytics />
+        )}
+
         {activeTab === 'messages' && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-3xl font-bold text-black">Messages</h2>
-              <Button className="bg-black hover:bg-gray-800 text-white rounded-xl">
-                <Plus className="h-4 w-4 mr-2" />
-                New Message
+              <Button 
+                className="bg-black hover:bg-gray-800 text-white rounded-xl"
+                onClick={() => markMessageAsRead(messages.filter(m => !m.isRead)[0]?.id)}
+              >
+                Mark All Read
               </Button>
             </div>
 
@@ -245,14 +273,27 @@ const Dashboard = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="p-3 hover:bg-black/5 rounded-xl cursor-pointer border border-gray-200/50">
+                  {messages.map((message) => (
+                    <div 
+                      key={message.id} 
+                      className={`p-3 hover:bg-black/5 rounded-xl cursor-pointer border border-gray-200/50 ${
+                        selectedMessage === message.id ? 'bg-black/10' : ''
+                      }`}
+                      onClick={() => {
+                        setSelectedMessage(message.id);
+                        if (!message.isRead) {
+                          markMessageAsRead(message.id);
+                        }
+                      }}
+                    >
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-black">Customer #{i}</span>
-                        <span className="text-xs text-black/50">2h</span>
+                        <span className="font-medium text-black">{message.customerName}</span>
+                        <span className="text-xs text-black/50">
+                          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
                       </div>
-                      <p className="text-sm text-black/60 truncate">Last message preview...</p>
-                      {i <= 2 && <Badge className="mt-1 bg-red-100 text-red-800">Unread</Badge>}
+                      <p className="text-sm text-black/60 truncate">{message.message}</p>
+                      {!message.isRead && <Badge className="mt-1 bg-red-100 text-red-800">Unread</Badge>}
                     </div>
                   ))}
                 </CardContent>
@@ -261,33 +302,56 @@ const Dashboard = () => {
               <Card className="lg:col-span-2 glass-morphism border-gray-200/50">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between text-black">
-                    <span>Chat with Customer #1</span>
+                    <span>
+                      {selectedMessage ? `Chat with ${messages.find(m => m.id === selectedMessage)?.customerName}` : 'Select a conversation'}
+                    </span>
                     <Button variant="ghost" size="sm">
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 bg-black/5 rounded-xl p-4 mb-4 overflow-y-auto">
-                    <div className="space-y-3">
-                      <div className="flex justify-start">
-                        <div className="bg-white rounded-xl p-3 max-w-xs shadow-sm border border-gray-200/50">
-                          <p className="text-sm text-black">Hello, I have a question about my order.</p>
-                          <span className="text-xs text-black/50">10:30 AM</span>
+                  {selectedMessage ? (
+                    <>
+                      <div className="h-64 bg-black/5 rounded-xl p-4 mb-4 overflow-y-auto">
+                        <div className="space-y-3">
+                          {messages
+                            .filter(m => m.customerId === messages.find(msg => msg.id === selectedMessage)?.customerId)
+                            .map((msg, index) => (
+                            <div key={index} className={`flex ${msg.customerId === 0 ? 'justify-end' : 'justify-start'}`}>
+                              <div className={`rounded-xl p-3 max-w-xs ${
+                                msg.customerId === 0 ? 'bg-black text-white' : 'bg-white shadow-sm border border-gray-200/50'
+                              }`}>
+                                <p className="text-sm">{msg.message}</p>
+                                <span className={`text-xs ${msg.customerId === 0 ? 'text-gray-300' : 'text-black/50'}`}>
+                                  {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                      <div className="flex justify-end">
-                        <div className="bg-black text-white rounded-xl p-3 max-w-xs">
-                          <p className="text-sm">Hi! I'd be happy to help. What's your order number?</p>
-                          <span className="text-xs text-gray-300">10:32 AM</span>
-                        </div>
+                      <div className="flex space-x-2">
+                        <Input 
+                          className="flex-1 rounded-xl bg-white/70 border-gray-300" 
+                          placeholder="Type your message..."
+                          value={newMessageText}
+                          onChange={(e) => setNewMessageText(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                        />
+                        <Button 
+                          className="bg-black hover:bg-gray-800 text-white rounded-xl"
+                          onClick={handleSendMessage}
+                        >
+                          Send
+                        </Button>
                       </div>
+                    </>
+                  ) : (
+                    <div className="h-64 flex items-center justify-center text-gray-500">
+                      <p>Select a conversation to start chatting</p>
                     </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Input className="flex-1 rounded-xl bg-white/70 border-gray-300" placeholder="Type your message..." />
-                    <Button className="bg-black hover:bg-gray-800 text-white rounded-xl">Send</Button>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -355,50 +419,6 @@ const Dashboard = () => {
                     <div key={i} className="flex items-center justify-between">
                       <span className="text-sm text-black">{setting}</span>
                       <input type="checkbox" defaultChecked={i < 3} className="rounded" />
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'analytics' && (
-          <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-black">Analytics & Reports</h2>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="glass-morphism border-gray-200/50">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-black">
-                    <TrendingUp className="h-5 w-5 mr-2" />
-                    Sales Trends
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64 bg-black/5 rounded-xl flex items-center justify-center">
-                    <p className="text-black/50">Sales chart would go here</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="glass-morphism border-gray-200/50">
-                <CardHeader>
-                  <CardTitle className="text-black">Performance Metrics</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { label: 'Average Order Value', value: '$34.50', change: '+12%' },
-                    { label: 'Customer Retention', value: '78%', change: '+5%' },
-                    { label: 'Order Fulfillment Time', value: '24 min', change: '-8%' },
-                    { label: 'Customer Satisfaction', value: '4.8/5', change: '+0.2' },
-                  ].map((metric, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-black/5 rounded-xl">
-                      <span className="text-sm text-black">{metric.label}</span>
-                      <div className="text-right">
-                        <div className="font-semibold text-black">{metric.value}</div>
-                        <div className="text-xs text-green-600">{metric.change}</div>
-                      </div>
                     </div>
                   ))}
                 </CardContent>
