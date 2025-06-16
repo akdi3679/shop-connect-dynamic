@@ -20,11 +20,7 @@ function App() {
                 <Route path="/" element={<Index />} />
                 <Route 
                   path="/dashboard" 
-                  element={
-                    <AuthWrapper>
-                      <Dashboard />
-                    </AuthWrapper>
-                  } 
+                  element={<AuthWrapper><Dashboard /></AuthWrapper>} 
                 />
                 <Route path="*" element={<NotFound />} />
               </Routes>
