@@ -1,185 +1,238 @@
 
-import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, X, Phone, Video } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { soundManager } from '@/utils/sounds';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { Send, MessageCircle, User, Clock } from 'lucide-react';
 
 interface Message {
   id: string;
-  text: string;
-  sender: 'user' | 'support' | 'system';
+  from: 'supplier' | 'owner';
+  content: string;
   timestamp: Date;
-  avatar?: string;
+  read: boolean;
+}
+
+interface Conversation {
+  id: string;
+  supplierId: string;
+  supplierName: string;
+  lastMessage: string;
+  lastMessageTime: Date;
+  unreadCount: number;
+  messages: Message[];
 }
 
 export const MessagingSystem = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
+  const [conversations, setConversations] = useState<Conversation[]>([
     {
       id: '1',
-      text: 'Welcome to GourmetGo! How can we help you today? 🍽️',
-      sender: 'support',
-      timestamp: new Date(),
-      avatar: '👨‍🍳'
+      supplierId: 'sup1',
+      supplierName: 'Fresh Ingredients Co.',
+      lastMessage: 'Your order has been shipped',
+      lastMessageTime: new Date(Date.now() - 2 * 60 * 60 * 1000),
+      unreadCount: 2,
+      messages: [
+        {
+          id: 'm1',
+          from: 'supplier',
+          content: 'Hello! Thank you for your order.',
+          timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
+          read: true
+        },
+        {
+          id: 'm2',
+          from: 'owner',
+          content: 'When will it be delivered?',
+          timestamp: new Date(Date.now() - 2.5 * 60 * 60 * 1000),
+          read: true
+        },
+        {
+          id: 'm3',
+          from: 'supplier',
+          content: 'Your order has been shipped and will arrive tomorrow.',
+          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+          read: false
+        }
+      ]
     }
   ]);
+
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
-  const [unreadCount, setUnreadCount] = useState(0);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   const sendMessage = () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !selectedConversation) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: newMessage,
-      sender: 'user',
-      timestamp: new Date()
+    const message: Message = {
+      id: `m${Date.now()}`,
+      from: 'owner',
+      content: newMessage.trim(),
+      timestamp: new Date(),
+      read: true
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setNewMessage('');
-    soundManager.play('message');
-
-    // Simulate support response
-    setTimeout(() => {
-      const supportResponses = [
-        "Thanks for your message! Our team will get back to you shortly. 😊",
-        "I'll connect you with our specialist right away!",
-        "Great question! Let me check that for you...",
-        "We're here to help! What specific information do you need?",
-        "Thanks for choosing GourmetGo! How can we make your experience better?"
-      ];
-
-      const response: Message = {
-        id: (Date.now() + 1).toString(),
-        text: supportResponses[Math.floor(Math.random() * supportResponses.length)],
-        sender: 'support',
-        timestamp: new Date(),
-        avatar: '👨‍🍳'
-      };
-
-      setMessages(prev => [...prev, response]);
-      if (!isOpen) {
-        setUnreadCount(prev => prev + 1);
-        soundManager.play('notification');
+    setConversations(prev => prev.map(conv => {
+      if (conv.id === selectedConversation) {
+        return {
+          ...conv,
+          messages: [...conv.messages, message],
+          lastMessage: message.content,
+          lastMessageTime: message.timestamp
+        };
       }
-    }, 1500);
+      return conv;
+    }));
+
+    setNewMessage('');
   };
 
-  const handleOpen = () => {
-    setIsOpen(true);
-    setUnreadCount(0);
+  const markAsRead = (conversationId: string) => {
+    setConversations(prev => prev.map(conv => {
+      if (conv.id === conversationId) {
+        return {
+          ...conv,
+          unreadCount: 0,
+          messages: conv.messages.map(msg => ({ ...msg, read: true }))
+        };
+      }
+      return conv;
+    }));
   };
+
+  const selectedConv = conversations.find(c => c.id === selectedConversation);
+
+  useEffect(() => {
+    if (selectedConversation) {
+      markAsRead(selectedConversation);
+    }
+  }, [selectedConversation]);
 
   return (
-    <>
-      {/* Chat Toggle Button */}
-      <Button
-        onClick={handleOpen}
-        className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-gradient-to-r from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 shadow-2xl transition-all duration-300 hover:scale-110"
-        size="icon"
-      >
-        <MessageCircle className="h-6 w-6 text-white" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center animate-bounce">
-            {unreadCount}
-          </span>
-        )}
-      </Button>
-
-      {/* Chat Window */}
-      {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-96 h-96 bg-white rounded-3xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden animate-scale-in">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-orange-400 to-orange-600 p-4 flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-xl">👨‍🍳</span>
-              </div>
-              <div>
-                <h3 className="font-semibold text-white">GourmetGo Support</h3>
-                <p className="text-sm text-orange-100">Online</p>
-              </div>
-            </div>
-            <div className="flex space-x-2">
-              <Button size="sm" variant="ghost" className="text-white hover:bg-white/20 rounded-full p-2">
-                <Phone className="h-4 w-4" />
-              </Button>
-              <Button size="sm" variant="ghost" className="text-white hover:bg-white/20 rounded-full p-2">
-                <Video className="h-4 w-4" />
-              </Button>
-              <Button 
-                size="sm" 
-                variant="ghost" 
-                className="text-white hover:bg-white/20 rounded-full p-2"
-                onClick={() => setIsOpen(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`max-w-[80%] ${
-                  message.sender === 'user'
-                    ? 'bg-gradient-to-r from-orange-400 to-orange-600 text-white rounded-2xl rounded-br-md'
-                    : 'bg-gray-100 text-gray-800 rounded-2xl rounded-bl-md'
-                } p-3 shadow-sm`}>
-                  {message.sender === 'support' && message.avatar && (
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="text-sm">{message.avatar}</span>
-                      <span className="text-xs text-gray-500">Support</span>
+    <div className="space-y-6">
+      <h2 className="text-3xl font-bold text-black">Messages</h2>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">
+        {/* Conversations List */}
+        <Card className="glass-morphism border-gray-200/50">
+          <CardHeader>
+            <CardTitle className="text-black flex items-center gap-2">
+              <MessageCircle className="h-5 w-5" />
+              Conversations
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <ScrollArea className="h-[500px]">
+              <div className="space-y-2 p-4">
+                {conversations.map((conv) => (
+                  <div
+                    key={conv.id}
+                    onClick={() => setSelectedConversation(conv.id)}
+                    className={`p-3 rounded-lg cursor-pointer transition-all hover:bg-white/60 ${
+                      selectedConversation === conv.id ? 'bg-white/80 border border-gray-200' : 'bg-white/40'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-1">
+                      <h4 className="font-semibold text-black text-sm">{conv.supplierName}</h4>
+                      {conv.unreadCount > 0 && (
+                        <Badge variant="destructive" className="text-xs">
+                          {conv.unreadCount}
+                        </Badge>
+                      )}
                     </div>
-                  )}
-                  <p className="text-sm">{message.text}</p>
-                  <p className={`text-xs mt-1 ${
-                    message.sender === 'user' ? 'text-orange-100' : 'text-gray-500'
-                  }`}>
-                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
+                    <p className="text-xs text-gray-600 truncate">{conv.lastMessage}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Clock className="h-3 w-3 text-gray-400" />
+                      <span className="text-xs text-gray-400">
+                        {conv.lastMessageTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+
+        {/* Chat Area */}
+        <Card className="lg:col-span-2 glass-morphism border-gray-200/50">
+          <CardHeader>
+            <CardTitle className="text-black">
+              {selectedConv ? selectedConv.supplierName : 'Select a conversation'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col h-[500px]">
+            {selectedConv ? (
+              <>
+                {/* Messages */}
+                <ScrollArea className="flex-1 mb-4">
+                  <div className="space-y-3">
+                    {selectedConv.messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.from === 'owner' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-[70%] p-3 rounded-lg ${
+                            message.from === 'owner'
+                              ? 'bg-black text-white'
+                              : 'bg-white/80 text-black border border-gray-200'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <User className="h-3 w-3" />
+                            <span className="text-xs font-medium">
+                              {message.from === 'owner' ? 'You' : selectedConv.supplierName}
+                            </span>
+                          </div>
+                          <p className="text-sm">{message.content}</p>
+                          <p className="text-xs opacity-70 mt-1">
+                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+
+                {/* Message Input */}
+                <div className="flex gap-2">
+                  <Textarea
+                    placeholder="Type your message..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    className="resize-none bg-white/80 border-gray-200"
+                    rows={2}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                      }
+                    }}
+                  />
+                  <Button
+                    onClick={sendMessage}
+                    disabled={!newMessage.trim()}
+                    className="self-end"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-center">
+                <div>
+                  <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600">Select a conversation to start messaging</p>
                 </div>
               </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input */}
-          <div className="p-4 border-t bg-gray-50">
-            <div className="flex space-x-2">
-              <Input
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type your message..."
-                className="flex-1 rounded-full border-gray-300 focus:border-orange-400"
-                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              />
-              <Button 
-                onClick={sendMessage}
-                size="icon"
-                className="rounded-full bg-gradient-to-r from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
