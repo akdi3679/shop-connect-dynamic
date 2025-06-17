@@ -4,7 +4,7 @@ import { Header } from '@/components/Header';
 import { Hero } from '@/components/Hero';
 import { ProductCarousel } from '@/components/ProductCarousel';
 import { LoadingScreen } from '@/components/LoadingScreen';
-import { UnifiedMessaging } from '@/components/UnifiedMessaging';
+import { MessagingSystem } from '@/components/MessagingSystem';
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,7 +20,7 @@ const Index = () => {
             <Hero />
             <ProductCarousel />
           </main>
-          <UnifiedMessaging />
+          <MessagingSystem />
         </div>
       )}
     </>
