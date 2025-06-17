@@ -3,14 +3,17 @@ import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Login from '@/components/Login';
 import SignUp from '@/components/SignUp';
-import Dashboard from '@/pages/Dashboard';
 
-const AuthWrapper: React.FC = () => {
+interface AuthWrapperProps {
+  children: React.ReactNode;
+}
+
+const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   const { isAuthenticated } = useAuth();
   const [showSignUp, setShowSignUp] = useState(false);
 
   if (isAuthenticated) {
-    return <Dashboard />;
+    return <>{children}</>;
   }
 
   if (showSignUp) {
