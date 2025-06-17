@@ -34,8 +34,8 @@ export const SignaturePad = ({ onSignatureChange, onClose }: SignaturePadProps) 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Make canvas transparent
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
   }, []);
 
   const getPosition = (event: React.MouseEvent | React.TouchEvent) => {
@@ -104,8 +104,6 @@ export const SignaturePad = ({ onSignatureChange, onClose }: SignaturePadProps) 
     setPoints(newPoints);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.strokeStyle = '#000';
@@ -135,35 +133,36 @@ export const SignaturePad = ({ onSignatureChange, onClose }: SignaturePadProps) 
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     setHasDrawn(false);
     onSignatureChange(null);
   };
 
   return (
     <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 border border-white/30">
-      {!hasDrawn && (
-        <div className="w-full h-16 flex items-center justify-center mb-2 border border-gray-200 rounded bg-gray-50">
-          <div className="w-8 h-8 opacity-30">
-            <DefaultSignatureIcon />
+      <div className="relative">
+        {!hasDrawn && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <div className="w-8 h-8 opacity-30">
+              <DefaultSignatureIcon />
+            </div>
           </div>
-        </div>
-      )}
-      
-      <canvas
-        ref={canvasRef}
-        className={`border border-gray-300 rounded bg-white touch-none ${hasDrawn ? 'block' : 'hidden'}`}
-        style={{ width: '100%', height: '100px' }}
-        onMouseDown={startDrawing}
-        onMouseMove={draw}
-        onMouseUp={stopDrawing}
-        onMouseOut={stopDrawing}
-        onTouchStart={startDrawing}
-        onTouchMove={draw}
-        onTouchEnd={stopDrawing}
-        onTouchCancel={stopDrawing}
-      />
+        )}
+        
+        <canvas
+          ref={canvasRef}
+          className="w-full bg-transparent touch-none"
+          style={{ height: '100px', border: 'none' }}
+          onMouseDown={startDrawing}
+          onMouseMove={draw}
+          onMouseUp={stopDrawing}
+          onMouseOut={stopDrawing}
+          onTouchStart={startDrawing}
+          onTouchMove={draw}
+          onTouchEnd={stopDrawing}
+          onTouchCancel={stopDrawing}
+        />
+      </div>
       
       <div className="flex justify-between mt-2">
         <Button 

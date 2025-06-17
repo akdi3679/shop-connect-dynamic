@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Sandwich, Salad } from 'lucide-react';
 import { products } from '@/data/products';
-import { ProductCard } from './ProductCard';
+import { ProductCardEnhanced } from './ProductCardEnhanced';
 import { Button } from './ui/button';
 
 // Custom Potato Icon since lucide doesn't have one
@@ -201,7 +201,7 @@ export const ProductCarousel = () => {
                     ? 'scale-90 opacity-40 -translate-x-4 blur-[1px]'
                     : 'scale-85 opacity-20'
                 }`}>
-                  <ProductCard product={product} />
+                  <ProductCardEnhanced product={product} />
                 </div>
               </div>
             ))}

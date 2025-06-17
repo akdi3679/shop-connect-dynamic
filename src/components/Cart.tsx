@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X } from 'lucide-react';
+import { X, ArrowLeft, CreditCard, Banknote } from 'lucide-react';
 import { SignaturePad } from '@/components/SignaturePad';
 
 interface CartProps {
@@ -51,126 +51,218 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
   const { cartItems, removeFromCart, updateQuantity, clearCart, cartTotal } = useCart();
   const [showSignature, setShowSignature] = useState(false);
   const [signature, setSignature] = useState<string | null>(null);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [checkoutData, setCheckoutData] = useState({
+    name: '',
+    address: '',
+    paymentMethod: 'cash'
+  });
+
+  const handleProceedToCheckout = () => {
+    setShowCheckout(true);
+  };
+
+  const handleBackToCart = () => {
+    setShowCheckout(false);
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="flex flex-col bg-white/90 backdrop-blur-lg border-l border-white/30 shadow-2xl w-full sm:max-w-sm">
-        {cartItems.length > 0 && (
-          <Button
-            variant="ghost"
-            onClick={clearCart}
-            className="absolute top-5 right-14 text-sm font-medium text-black hover:text-red-600 hover:bg-red-50 px-2 py-1 h-auto rounded-md"
-          >
-            Clear
-          </Button>
-        )}
-        <SheetHeader className="pb-4">
-          <SheetTitle className="text-xl font-bold text-black">Your Cart</SheetTitle>
-        </SheetHeader>
-        {cartItems.length > 0 ? (
-          <>
-            <ScrollArea className="flex-grow pr-4">
-              <div className="space-y-4">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex items-center space-x-4 bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-white/30">
-                    <img src={item.image} alt={item.name} className="h-16 w-16 rounded-xl object-cover shadow-sm" />
-                    <div className="flex-grow">
-                      <p className="font-semibold text-black">{item.name}</p>
-                      <div className="flex items-center gap-1 text-sm text-gray-700">
-                        <CurrencyIcon className="w-8 h-8" color="#374151" />
-                        <span>{item.price.toFixed(2)}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 mt-2">
-                        <Input
-                          type="number"
-                          min="1"
-                          value={item.quantity}
-                          onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
-                          className="h-8 w-16 rounded-lg bg-white/80 border-white/30 text-black"
-                        />
-                      </div>
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={() => removeFromCart(item.id)}
-                      className="rounded-full hover:bg-red-50 text-black hover:text-red-600 h-8 w-8"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-            <SheetFooter className="mt-auto pt-4 border-t border-white/20">
-              <div className="w-full space-y-4">
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-white/30">
-                  <div className="flex justify-between items-center font-bold text-xl text-black">
-                    <span>Total</span>
-                    <div className="flex items-center gap-1">
-                      <CurrencyIcon className="w-12 h-12" color="#000000" />
-                      <span>{cartTotal.toFixed(2)}</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center mt-2">
-                    <div className="flex items-center gap-1 text-xs text-gray-600">
-                      <span>Shipping cost:</span>
-                      <CurrencyIcon className="w-6 h-6" color="#6B7280" />
-                      <span>7.00</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
-                      <PremiumQualityIcon />
-                      <span className="font-script italic">Premium Quality</span>
-                    </div>
-                  </div>
-                  
-                  {/* Signature Section */}
-                  <div className="mt-3 pt-3 border-t border-white/20">
-                    <div className="flex flex-col items-center space-y-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => setShowSignature(!showSignature)}
-                        className="text-xs h-6 px-3 text-gray-600 hover:text-black"
-                      >
-                        Sign
-                      </Button>
-                      
-                      {!showSignature && (
-                        <div className="flex justify-center">
-                          {signature ? (
-                            <div className="w-24 h-12 border border-gray-200 rounded bg-white">
-                              <img src={signature} alt="Signature" className="w-full h-full object-contain" />
-                            </div>
-                          ) : (
-                            <DefaultSignatureIcon />
-                          )}
+      <SheetContent className="flex flex-col bg-white/90 backdrop-blur-lg border-l border-white/30 shadow-2xl w-full sm:max-w-sm overflow-hidden">
+        <div className={`transition-transform duration-500 ease-in-out ${showCheckout ? '-translate-x-full' : 'translate-x-0'}`}>
+          {cartItems.length > 0 && (
+            <Button
+              variant="ghost"
+              onClick={clearCart}
+              className="absolute top-5 right-14 text-sm font-medium text-black hover:text-red-600 hover:bg-red-50 px-2 py-1 h-auto rounded-md"
+            >
+              Clear
+            </Button>
+          )}
+          <SheetHeader className="pb-4">
+            <SheetTitle className="text-xl font-bold text-black">Your Cart</SheetTitle>
+          </SheetHeader>
+          {cartItems.length > 0 ? (
+            <>
+              <ScrollArea className="flex-grow pr-4">
+                <div className="space-y-4">
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="flex items-center space-x-4 bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-white/30">
+                      <img src={item.image} alt={item.name} className="h-16 w-16 rounded-xl object-cover shadow-sm" />
+                      <div className="flex-grow">
+                        <p className="font-semibold text-black">{item.name}</p>
+                        <div className="flex items-center gap-1 text-sm text-gray-700">
+                          <CurrencyIcon className="w-8 h-8" color="#374151" />
+                          <span>{item.price.toFixed(2)}</span>
                         </div>
-                      )}
-                      
-                      {showSignature && (
-                        <div className="w-full">
-                          <SignaturePad 
-                            onSignatureChange={setSignature}
-                            onClose={() => setShowSignature(false)}
+                        <div className="flex items-center space-x-2 mt-2">
+                          <Input
+                            type="number"
+                            min="1"
+                            value={item.quantity}
+                            onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
+                            className="h-8 w-16 rounded-lg bg-white/80 border-white/30 text-black"
                           />
                         </div>
-                      )}
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => removeFromCart(item.id)}
+                        className="rounded-full hover:bg-red-50 text-black hover:text-red-600 h-8 w-8"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              <SheetFooter className="mt-auto pt-4 border-t border-white/20">
+                <div className="w-full space-y-4">
+                  <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-white/30">
+                    <div className="flex justify-between items-center font-bold text-xl text-black">
+                      <span>Total</span>
+                      <div className="flex items-center gap-1">
+                        <CurrencyIcon className="w-12 h-12" color="#000000" />
+                        <span>{cartTotal.toFixed(2)}</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center mt-2">
+                      <div className="flex items-center gap-1 text-xs text-gray-600">
+                        <span>Shipping cost:</span>
+                        <CurrencyIcon className="w-6 h-6" color="#6B7280" />
+                        <span>7.00</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <PremiumQualityIcon />
+                        <span className="font-script italic">Premium Quality</span>
+                      </div>
+                    </div>
+                    
+                    {/* Signature Section */}
+                    <div className="mt-3 pt-3 border-t border-white/20">
+                      <div className="flex flex-col items-end space-y-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setShowSignature(!showSignature)}
+                          className="text-xs h-6 px-3 text-gray-600 hover:text-black"
+                        >
+                          Sign
+                        </Button>
+                        
+                        {!showSignature && (
+                          <div className="flex justify-center">
+                            {signature ? (
+                              <div className="w-24 h-12 rounded bg-transparent">
+                                <img src={signature} alt="Signature" className="w-full h-full object-contain" />
+                              </div>
+                            ) : (
+                              <DefaultSignatureIcon />
+                            )}
+                          </div>
+                        )}
+                        
+                        {showSignature && (
+                          <div className="w-full">
+                            <SignaturePad 
+                              onSignatureChange={setSignature}
+                              onClose={() => setShowSignature(false)}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
+                  <Button 
+                    className="w-full rounded-xl bg-black hover:bg-gray-800 text-white font-semibold py-3"
+                    onClick={handleProceedToCheckout}
+                  >
+                    Proceed to Checkout
+                  </Button>
                 </div>
-                <Button className="w-full rounded-xl bg-black hover:bg-gray-800 text-white font-semibold py-3">
-                  Proceed to Checkout
+              </SheetFooter>
+            </>
+          ) : (
+            <div className="flex-grow flex flex-col items-center justify-center text-center bg-white/80 backdrop-blur-sm rounded-xl p-8 m-4 border border-white/30">
+              <p className="text-lg font-semibold text-black">Your cart is empty</p>
+              <p className="text-gray-600 mt-2">Add some delicious items to get started!</p>
+            </div>
+          )}
+        </div>
+
+        {/* Checkout Section */}
+        <div className={`absolute inset-0 transition-transform duration-500 ease-in-out ${showCheckout ? 'translate-x-0' : 'translate-x-full'} bg-white/90 backdrop-blur-lg p-6`}>
+          <div className="flex items-center mb-6">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBackToCart}
+              className="mr-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <h2 className="text-xl font-bold text-black">Checkout</h2>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-black mb-2">Full Name</label>
+              <Input
+                value={checkoutData.name}
+                onChange={(e) => setCheckoutData({...checkoutData, name: e.target.value})}
+                placeholder="Enter your full name"
+                className="bg-white/80 border-white/30"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-black mb-2">Delivery Address</label>
+              <Input
+                value={checkoutData.address}
+                onChange={(e) => setCheckoutData({...checkoutData, address: e.target.value})}
+                placeholder="Enter your delivery address"
+                className="bg-white/80 border-white/30"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-black mb-2">Payment Method</label>
+              <div className="space-y-2">
+                <Button
+                  variant={checkoutData.paymentMethod === 'cash' ? 'default' : 'outline'}
+                  className="w-full justify-start"
+                  onClick={() => setCheckoutData({...checkoutData, paymentMethod: 'cash'})}
+                >
+                  <Banknote className="mr-2 h-4 w-4" />
+                  Cash on Delivery
+                </Button>
+                <Button
+                  variant={checkoutData.paymentMethod === 'card' ? 'default' : 'outline'}
+                  className="w-full justify-start"
+                  onClick={() => setCheckoutData({...checkoutData, paymentMethod: 'card'})}
+                >
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Credit/Debit Card
                 </Button>
               </div>
-            </SheetFooter>
-          </>
-        ) : (
-          <div className="flex-grow flex flex-col items-center justify-center text-center bg-white/80 backdrop-blur-sm rounded-xl p-8 m-4 border border-white/30">
-            <p className="text-lg font-semibold text-black">Your cart is empty</p>
-            <p className="text-gray-600 mt-2">Add some delicious items to get started!</p>
+            </div>
+
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-white/30 mt-6">
+              <div className="flex justify-between items-center font-bold text-lg text-black">
+                <span>Total Amount</span>
+                <div className="flex items-center gap-1">
+                  <CurrencyIcon className="w-10 h-10" color="#000000" />
+                  <span>{(cartTotal + 7).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+
+            <Button className="w-full rounded-xl bg-black hover:bg-gray-800 text-white font-semibold py-3 mt-6">
+              Place Order
+            </Button>
           </div>
-        )}
+        </div>
       </SheetContent>
     </Sheet>
   );
