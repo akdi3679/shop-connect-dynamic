@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Sandwich, Salad } from 'lucide-react';
 import { products } from '@/data/products';
-import { ProductCardEnhanced } from './ProductCardEnhanced';
+import { ProductCard } from './ProductCard';
 import { Button } from './ui/button';
 
 // Custom Potato Icon since lucide doesn't have one
@@ -37,6 +37,7 @@ export const ProductCarousel = () => {
   const [isSliding, setIsSliding] = useState(false);
   const [startX, setStartX] = useState(0);
   const [currentX, setCurrentX] = useState(0);
+  const [showDescription, setShowDescription] = useState<{ [key: number]: boolean }>({});
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const filteredProducts = products.filter(product => 
@@ -46,6 +47,13 @@ export const ProductCarousel = () => {
     (selectedCategory === 'potato' && product.name.toLowerCase().includes('potato')) ||
     (selectedCategory === 'drink' && (product.name.toLowerCase().includes('drink') || product.name.toLowerCase().includes('juice') || product.name.toLowerCase().includes('soda')))
   );
+
+  const handleNameClick = (productId: number) => {
+    setShowDescription(prev => ({
+      ...prev,
+      [productId]: !prev[productId]
+    }));
+  };
 
   useEffect(() => {
     if (!isAutoPlaying || isDragging) return;
@@ -201,7 +209,11 @@ export const ProductCarousel = () => {
                     ? 'scale-90 opacity-40 -translate-x-4 blur-[1px]'
                     : 'scale-85 opacity-20'
                 }`}>
-                  <ProductCardEnhanced product={product} />
+                  <ProductCard 
+                    product={product} 
+                    onNameClick={() => handleNameClick(product.id)}
+                    showDescription={showDescription[product.id] || false}
+                  />
                 </div>
               </div>
             ))}
