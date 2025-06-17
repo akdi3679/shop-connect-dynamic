@@ -21,7 +21,6 @@ const DefaultSignatureIcon = () => (
 export const SignaturePad = ({ onSignatureChange, onClose }: SignaturePadProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [points, setPoints] = useState<Array<{x: number, y: number}>>([]);
   const [hasDrawn, setHasDrawn] = useState(false);
 
   useEffect(() => {
@@ -34,6 +33,7 @@ export const SignaturePad = ({ onSignatureChange, onClose }: SignaturePadProps) 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Clear the canvas with white background
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }, []);
@@ -47,48 +47,23 @@ export const SignaturePad = ({ onSignatureChange, onClose }: SignaturePadProps) 
     const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
     
     return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
+      x: (clientX - rect.left) * (canvas.width / rect.width),
+      y: (clientY - rect.top) * (canvas.height / rect.height)
     };
-  };
-
-  const drawCurve = (ctx: CanvasRenderingContext2D, points: Array<{x: number, y: number}>) => {
-    if (points.length < 3) {
-      if (points.length > 0) {
-        const b = points[0];
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, 1, 0, Math.PI * 2, true);
-        ctx.fill();
-        ctx.closePath();
-      }
-      return;
-    }
-
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-
-    for (let i = 1; i < points.length - 2; i++) {
-      const c = (points[i].x + points[i + 1].x) / 2;
-      const d = (points[i].y + points[i + 1].y) / 2;
-      ctx.quadraticCurveTo(points[i].x, points[i].y, c, d);
-    }
-
-    ctx.quadraticCurveTo(
-      points[points.length - 2].x,
-      points[points.length - 2].y,
-      points[points.length - 1].x,
-      points[points.length - 1].y
-    );
-
-    ctx.stroke();
   };
 
   const startDrawing = (event: React.MouseEvent | React.TouchEvent) => {
     event.preventDefault();
     setIsDrawing(true);
-    const pos = getPosition(event);
-    setPoints([pos]);
     setHasDrawn(true);
+    
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+
+    const pos = getPosition(event);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
   };
 
   const draw = (event: React.MouseEvent | React.TouchEvent) => {
@@ -100,17 +75,11 @@ export const SignaturePad = ({ onSignatureChange, onClose }: SignaturePadProps) 
     if (!canvas || !ctx) return;
 
     const pos = getPosition(event);
-    const newPoints = [...points, pos];
-    setPoints(newPoints);
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.strokeStyle = '#000';
-
-    drawCurve(ctx, newPoints);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
   };
 
   const stopDrawing = (event: React.MouseEvent | React.TouchEvent) => {
@@ -119,15 +88,11 @@ export const SignaturePad = ({ onSignatureChange, onClose }: SignaturePadProps) 
     setIsDrawing(false);
     
     const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!canvas || !ctx) return;
+    if (!canvas) return;
 
-    drawCurve(ctx, points);
-    
-    // Convert canvas to image data URL
-    const imageData = canvas.toDataURL();
+    // Convert canvas to image data URL without border
+    const imageData = canvas.toDataURL('image/png');
     onSignatureChange(imageData);
-    setPoints([]);
   };
 
   const clearSignature = () => {
@@ -142,18 +107,10 @@ export const SignaturePad = ({ onSignatureChange, onClose }: SignaturePadProps) 
   };
 
   return (
-    <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 border border-white/30">
-      {!hasDrawn && (
-        <div className="w-full h-16 flex items-center justify-center mb-2 border border-gray-200 rounded bg-gray-50">
-          <div className="w-8 h-8 opacity-30">
-            <DefaultSignatureIcon />
-          </div>
-        </div>
-      )}
-      
+    <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3">
       <canvas
         ref={canvasRef}
-        className={`border border-gray-300 rounded bg-white touch-none ${hasDrawn ? 'block' : 'hidden'}`}
+        className="border border-gray-300 rounded bg-white touch-none cursor-crosshair"
         style={{ width: '100%', height: '100px' }}
         onMouseDown={startDrawing}
         onMouseMove={draw}
