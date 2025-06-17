@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, ArrowLeft, CreditCard, Banknote } from 'lucide-react';
+import { X, ArrowLeft, CreditCard, Banknote, Check, Loader2 } from 'lucide-react';
 import { SignaturePad } from '@/components/SignaturePad';
 
 interface CartProps {
@@ -47,15 +47,37 @@ const PremiumQualityIcon = () => (
   </svg>
 );
 
+// Success animation component
+const SuccessAnimation = () => (
+  <div className="flex flex-col items-center justify-center space-y-6 p-8">
+    <div className="relative">
+      <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center animate-scale-in">
+        <Check className="w-12 h-12 text-green-600 animate-fade-in" />
+      </div>
+      <div className="absolute inset-0 bg-green-200 rounded-full animate-ping opacity-75"></div>
+    </div>
+    <div className="text-center space-y-2">
+      <h3 className="text-2xl font-bold text-green-600">Order Placed Successfully!</h3>
+      <p className="text-gray-600">Thank you for your order. We'll prepare it right away!</p>
+    </div>
+  </div>
+);
+
 export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
   const { cartItems, removeFromCart, updateQuantity, clearCart, cartTotal } = useCart();
   const [showSignature, setShowSignature] = useState(false);
   const [signature, setSignature] = useState<string | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [checkoutData, setCheckoutData] = useState({
     name: '',
     address: '',
-    paymentMethod: 'cash'
+    paymentMethod: 'cash',
+    cardNumber: '',
+    expiryDate: '',
+    cvv: '',
+    cardholderName: ''
   });
 
   const handleProceedToCheckout = () => {
@@ -66,10 +88,54 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
     setShowCheckout(false);
   };
 
+  const handlePlaceOrder = async () => {
+    // Validate required fields
+    if (!checkoutData.name || !checkoutData.address) return;
+    
+    if (checkoutData.paymentMethod === 'card') {
+      if (!checkoutData.cardNumber || !checkoutData.expiryDate || !checkoutData.cvv || !checkoutData.cardholderName) return;
+    }
+
+    setIsProcessing(true);
+    
+    // Simulate order processing
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    setIsProcessing(false);
+    setShowCheckout(false);
+    setShowSuccess(true);
+    
+    // Clear cart after successful order
+    setTimeout(() => {
+      clearCart();
+      setShowSuccess(false);
+      onOpenChange(false);
+      setCheckoutData({
+        name: '',
+        address: '',
+        paymentMethod: 'cash',
+        cardNumber: '',
+        expiryDate: '',
+        cvv: '',
+        cardholderName: ''
+      });
+    }, 3000);
+  };
+
+  const isFormValid = () => {
+    if (!checkoutData.name || !checkoutData.address) return false;
+    if (checkoutData.paymentMethod === 'card') {
+      return checkoutData.cardNumber && checkoutData.expiryDate && checkoutData.cvv && checkoutData.cardholderName;
+    }
+    return true;
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent className="flex flex-col bg-white/90 backdrop-blur-lg border-l border-white/30 shadow-2xl w-full sm:max-w-sm overflow-hidden">
-        <div className={`transition-transform duration-500 ease-in-out ${showCheckout ? '-translate-x-full' : 'translate-x-0'}`}>
+        
+        {/* Main Cart Content */}
+        <div className={`transition-transform duration-500 ease-in-out ${showCheckout ? '-translate-x-full' : 'translate-x-0'} ${showSuccess ? '-translate-x-full' : ''}`}>
           {cartItems.length > 0 && (
             <Button
               variant="ghost"
@@ -141,7 +207,7 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
                     
                     {/* Signature Section */}
                     <div className="mt-3 pt-3 border-t border-white/20">
-                      <div className="flex flex-col items-end space-y-2">
+                      <div className="flex flex-col items-center space-y-2">
                         <Button 
                           variant="ghost" 
                           size="sm"
@@ -152,13 +218,15 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
                         </Button>
                         
                         {!showSignature && (
-                          <div className="flex justify-center">
+                          <div className="flex justify-center w-full">
                             {signature ? (
-                              <div className="w-24 h-12 rounded bg-transparent">
-                                <img src={signature} alt="Signature" className="w-full h-full object-contain" />
+                              <div className="w-24 h-12 rounded bg-transparent flex items-center justify-center">
+                                <img src={signature} alt="Signature" className="max-w-full max-h-full object-contain" />
                               </div>
                             ) : (
-                              <DefaultSignatureIcon />
+                              <div className="flex justify-center">
+                                <DefaultSignatureIcon />
+                              </div>
                             )}
                           </div>
                         )}
@@ -168,6 +236,7 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
                             <SignaturePad 
                               onSignatureChange={setSignature}
                               onClose={() => setShowSignature(false)}
+                              existingSignature={signature}
                             />
                           </div>
                         )}
@@ -192,7 +261,7 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
         </div>
 
         {/* Checkout Section */}
-        <div className={`absolute inset-0 transition-transform duration-500 ease-in-out ${showCheckout ? 'translate-x-0' : 'translate-x-full'} bg-white/90 backdrop-blur-lg p-6`}>
+        <div className={`absolute inset-0 transition-transform duration-500 ease-in-out ${showCheckout ? 'translate-x-0' : 'translate-x-full'} bg-white/90 backdrop-blur-lg p-6 overflow-y-auto`}>
           <div className="flex items-center mb-6">
             <Button
               variant="ghost"
@@ -205,50 +274,119 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
             <h2 className="text-xl font-bold text-black">Checkout</h2>
           </div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-black mb-2">Full Name</label>
-              <Input
-                value={checkoutData.name}
-                onChange={(e) => setCheckoutData({...checkoutData, name: e.target.value})}
-                placeholder="Enter your full name"
-                className="bg-white/80 border-white/30"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-black mb-2">Delivery Address</label>
-              <Input
-                value={checkoutData.address}
-                onChange={(e) => setCheckoutData({...checkoutData, address: e.target.value})}
-                placeholder="Enter your delivery address"
-                className="bg-white/80 border-white/30"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-black mb-2">Payment Method</label>
-              <div className="space-y-2">
-                <Button
-                  variant={checkoutData.paymentMethod === 'cash' ? 'default' : 'outline'}
-                  className="w-full justify-start"
-                  onClick={() => setCheckoutData({...checkoutData, paymentMethod: 'cash'})}
-                >
-                  <Banknote className="mr-2 h-4 w-4" />
-                  Cash on Delivery
-                </Button>
-                <Button
-                  variant={checkoutData.paymentMethod === 'card' ? 'default' : 'outline'}
-                  className="w-full justify-start"
-                  onClick={() => setCheckoutData({...checkoutData, paymentMethod: 'card'})}
-                >
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Credit/Debit Card
-                </Button>
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">Full Name *</label>
+                <Input
+                  value={checkoutData.name}
+                  onChange={(e) => setCheckoutData({...checkoutData, name: e.target.value})}
+                  placeholder="Enter your full name"
+                  className="bg-white/80 border-white/30 rounded-xl"
+                />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">Delivery Address *</label>
+                <Input
+                  value={checkoutData.address}
+                  onChange={(e) => setCheckoutData({...checkoutData, address: e.target.value})}
+                  placeholder="Enter your delivery address"
+                  className="bg-white/80 border-white/30 rounded-xl"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black mb-3">Payment Method *</label>
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => setCheckoutData({...checkoutData, paymentMethod: 'cash'})}
+                    className={`w-full p-4 rounded-xl border-2 transition-all duration-200 ${
+                      checkoutData.paymentMethod === 'cash'
+                        ? 'border-black bg-black/5 shadow-md'
+                        : 'border-gray-200 bg-white/80 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Banknote className="mr-3 h-5 w-5" />
+                        <span className="font-medium">Cash on Delivery</span>
+                      </div>
+                      {checkoutData.paymentMethod === 'cash' && (
+                        <Check className="h-5 w-5 text-black" />
+                      )}
+                    </div>
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => setCheckoutData({...checkoutData, paymentMethod: 'card'})}
+                    className={`w-full p-4 rounded-xl border-2 transition-all duration-200 ${
+                      checkoutData.paymentMethod === 'card'
+                        ? 'border-black bg-black/5 shadow-md'
+                        : 'border-gray-200 bg-white/80 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <CreditCard className="mr-3 h-5 w-5" />
+                        <span className="font-medium">Credit/Debit Card</span>
+                      </div>
+                      {checkoutData.paymentMethod === 'card' && (
+                        <Check className="h-5 w-5 text-black" />
+                      )}
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Card details - only show when card is selected */}
+              {checkoutData.paymentMethod === 'card' && (
+                <div className="space-y-4 animate-fade-in">
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Cardholder Name *</label>
+                    <Input
+                      value={checkoutData.cardholderName}
+                      onChange={(e) => setCheckoutData({...checkoutData, cardholderName: e.target.value})}
+                      placeholder="Name on card"
+                      className="bg-white/80 border-white/30 rounded-xl"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-black mb-2">Card Number *</label>
+                    <Input
+                      value={checkoutData.cardNumber}
+                      onChange={(e) => setCheckoutData({...checkoutData, cardNumber: e.target.value})}
+                      placeholder="1234 5678 9012 3456"
+                      className="bg-white/80 border-white/30 rounded-xl"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-black mb-2">Expiry Date *</label>
+                      <Input
+                        value={checkoutData.expiryDate}
+                        onChange={(e) => setCheckoutData({...checkoutData, expiryDate: e.target.value})}
+                        placeholder="MM/YY"
+                        className="bg-white/80 border-white/30 rounded-xl"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-black mb-2">CVV *</label>
+                      <Input
+                        value={checkoutData.cvv}
+                        onChange={(e) => setCheckoutData({...checkoutData, cvv: e.target.value})}
+                        placeholder="123"
+                        className="bg-white/80 border-white/30 rounded-xl"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 border border-white/30 mt-6">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-white/30">
               <div className="flex justify-between items-center font-bold text-lg text-black">
                 <span>Total Amount</span>
                 <div className="flex items-center gap-1">
@@ -258,10 +396,26 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
               </div>
             </div>
 
-            <Button className="w-full rounded-xl bg-black hover:bg-gray-800 text-white font-semibold py-3 mt-6">
-              Place Order
+            <Button 
+              className="w-full rounded-xl bg-black hover:bg-gray-800 text-white font-semibold py-3 disabled:opacity-50"
+              onClick={handlePlaceOrder}
+              disabled={!isFormValid() || isProcessing}
+            >
+              {isProcessing ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Processing...
+                </div>
+              ) : (
+                'Place Order'
+              )}
             </Button>
           </div>
+        </div>
+
+        {/* Success Section */}
+        <div className={`absolute inset-0 transition-transform duration-500 ease-in-out ${showSuccess ? 'translate-x-0' : 'translate-x-full'} bg-white/90 backdrop-blur-lg flex items-center justify-center`}>
+          <SuccessAnimation />
         </div>
       </SheetContent>
     </Sheet>

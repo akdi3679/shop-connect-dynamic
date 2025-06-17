@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 interface SignaturePadProps {
   onSignatureChange: (signature: string | null) => void;
   onClose: () => void;
+  existingSignature?: string | null;
 }
 
 const DefaultSignatureIcon = () => (
@@ -18,7 +19,7 @@ const DefaultSignatureIcon = () => (
   </svg>
 );
 
-export const SignaturePad = ({ onSignatureChange, onClose }: SignaturePadProps) => {
+export const SignaturePad = ({ onSignatureChange, onClose, existingSignature }: SignaturePadProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [points, setPoints] = useState<Array<{x: number, y: number}>>([]);
@@ -34,9 +35,20 @@ export const SignaturePad = ({ onSignatureChange, onClose }: SignaturePadProps) 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Make canvas transparent
+    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }, []);
+    
+    // If there's an existing signature, draw it as background reference
+    if (existingSignature) {
+      const img = new Image();
+      img.onload = () => {
+        ctx.globalAlpha = 0.3; // Make it semi-transparent as reference
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = 1.0; // Reset alpha
+      };
+      img.src = existingSignature;
+    }
+  }, [existingSignature]);
 
   const getPosition = (event: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
@@ -104,11 +116,28 @@ export const SignaturePad = ({ onSignatureChange, onClose }: SignaturePadProps) 
     setPoints(newPoints);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#000';
-
-    drawCurve(ctx, newPoints);
+    
+    // Redraw existing signature as reference if it exists
+    if (existingSignature) {
+      const img = new Image();
+      img.onload = () => {
+        ctx.globalAlpha = 0.3;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = 1.0;
+        
+        // Draw new signature on top
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#000';
+        drawCurve(ctx, newPoints);
+      };
+      img.src = existingSignature;
+    } else {
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#000';
+      drawCurve(ctx, newPoints);
+    }
   };
 
   const stopDrawing = (event: React.MouseEvent | React.TouchEvent) => {
@@ -120,10 +149,15 @@ export const SignaturePad = ({ onSignatureChange, onClose }: SignaturePadProps) 
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
 
+    // Clear and draw final signature without reference
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#000';
     drawCurve(ctx, points);
     
     // Convert canvas to image data URL
-    const imageData = canvas.toDataURL();
+    const imageData = canvas.toDataURL('image/png');
     onSignatureChange(imageData);
     setPoints([]);
   };
@@ -141,7 +175,7 @@ export const SignaturePad = ({ onSignatureChange, onClose }: SignaturePadProps) 
   return (
     <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 border border-white/30">
       <div className="relative">
-        {!hasDrawn && (
+        {!hasDrawn && !existingSignature && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
             <div className="w-8 h-8 opacity-30">
               <DefaultSignatureIcon />
@@ -151,8 +185,8 @@ export const SignaturePad = ({ onSignatureChange, onClose }: SignaturePadProps) 
         
         <canvas
           ref={canvasRef}
-          className="w-full bg-transparent touch-none"
-          style={{ height: '100px', border: 'none' }}
+          className="w-full bg-transparent touch-none border-0"
+          style={{ height: '100px' }}
           onMouseDown={startDrawing}
           onMouseMove={draw}
           onMouseUp={stopDrawing}

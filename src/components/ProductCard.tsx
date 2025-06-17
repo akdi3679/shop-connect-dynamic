@@ -9,6 +9,8 @@ import { Plus, ShoppingCart } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
+  onNameClick?: () => void;
+  showDescription?: boolean;
 }
 
 const CurrencyIcon = ({ className = "w-20 h-20", color = "currentColor" }: { className?: string; color?: string }) => (
@@ -28,7 +30,7 @@ const CurrencyIcon = ({ className = "w-20 h-20", color = "currentColor" }: { cla
   </svg>
 );
 
-export const ProductCard = ({ product }: ProductCardProps) => {
+export const ProductCard = ({ product, onNameClick, showDescription }: ProductCardProps) => {
   const { addToCart } = useCart();
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -93,7 +95,25 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
         {/* Product name with gradient black to transparent without blur */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-4">
-          <h3 className="text-lg font-bold text-white">{product.name}</h3>
+          <div className="relative">
+            <h3 
+              className={`text-lg font-bold text-white cursor-pointer transition-transform duration-300 ${
+                showDescription ? 'transform -translate-y-2' : ''
+              }`}
+              onClick={onNameClick}
+            >
+              {product.name}
+            </h3>
+            
+            {/* Description that appears below the name */}
+            <div className={`transition-all duration-300 overflow-hidden ${
+              showDescription ? 'max-h-20 opacity-100 mt-2' : 'max-h-0 opacity-0'
+            }`}>
+              <p className="text-sm text-white/90 leading-relaxed">
+                {product.description || "Delicious and fresh, made with the finest ingredients for your enjoyment."}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Add to cart button - floating on image */}
