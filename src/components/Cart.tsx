@@ -9,7 +9,6 @@ import { toast } from 'sonner';
 export const Cart = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showSignature, setShowSignature] = useState(false);
-  const [currentSignature, setCurrentSignature] = useState<string | null>(null);
   const { cartItems, removeFromCart, updateQuantity, clearCart, cartTotal, cartCount } = useCart();
 
   const handleCheckout = () => {
@@ -20,17 +19,10 @@ export const Cart = () => {
     setShowSignature(true);
   };
 
-  const handleSignatureChange = (signatureData: string | null) => {
-    setCurrentSignature(signatureData);
-  };
-
-  const handleSignatureClose = () => {
-    if (currentSignature) {
-      console.log('Signature captured:', currentSignature);
-      toast.success('Order placed successfully!');
-      clearCart();
-      setCurrentSignature(null);
-    }
+  const handleSignatureComplete = (signatureData: string) => {
+    console.log('Signature captured:', signatureData);
+    toast.success('Order placed successfully!');
+    clearCart();
     setShowSignature(false);
     setIsOpen(false);
   };
@@ -165,15 +157,10 @@ export const Cart = () => {
 
       {/* Signature Modal */}
       {showSignature && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-xl">
-            <h3 className="text-lg font-semibold mb-4 text-center">Please sign to complete your order</h3>
-            <SignaturePad
-              onSignatureChange={handleSignatureChange}
-              onClose={handleSignatureClose}
-            />
-          </div>
-        </div>
+        <SignaturePad
+          onComplete={handleSignatureComplete}
+          onCancel={() => setShowSignature(false)}
+        />
       )}
     </>
   );
