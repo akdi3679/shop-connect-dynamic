@@ -174,7 +174,7 @@ export const SignaturePad = ({ onSignatureChange, onClose, existingSignature }: 
 
   return (
     <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 border border-white/30">
-      <div className="relative">
+      <div className="relative flex justify-center">
         {!hasDrawn && !existingSignature && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
             <div className="w-8 h-8 opacity-30">
@@ -185,8 +185,8 @@ export const SignaturePad = ({ onSignatureChange, onClose, existingSignature }: 
         
         <canvas
           ref={canvasRef}
-          className="w-full bg-transparent touch-none border-0"
-          style={{ height: '100px' }}
+          className="bg-transparent touch-none border-0"
+          style={{ height: '100px', width: '300px' }}
           onMouseDown={startDrawing}
           onMouseMove={draw}
           onMouseUp={stopDrawing}

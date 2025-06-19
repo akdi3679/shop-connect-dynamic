@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { ProductManagement } from '@/components/ProductManagement';
 import { Analytics } from '@/components/Analytics';
 import { useProducts } from '@/contexts/ProductContext';
+import { toast } from 'sonner';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -20,6 +21,19 @@ const Dashboard = () => {
   const { messages, markMessageAsRead, addMessage } = useProducts();
   const [selectedMessage, setSelectedMessage] = useState<number | null>(null);
   const [newMessageText, setNewMessageText] = useState('');
+  const [settings, setSettings] = useState({
+    restaurantName: user?.role === 'admin' ? 'GourmetGo' : user?.storeName || '',
+    email: user?.email || '',
+    phone: user?.phoneNumber || '',
+    location: user?.location || '',
+    notifications: {
+      orders: true,
+      payments: true,
+      messages: true,
+      updates: false,
+      marketing: false
+    }
+  });
 
   const unreadMessages = messages.filter(m => !m.isRead);
 
@@ -41,6 +55,10 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     logout();
+    toast.success('Logged out successfully');
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 1000);
   };
 
   const filteredMenuItems = menuItems.filter(item => 
@@ -49,17 +67,44 @@ const Dashboard = () => {
 
   const handleSendMessage = () => {
     if (newMessageText.trim() && selectedMessage) {
-      // Simulate sending a message back
       const selectedMsg = messages.find(m => m.id === selectedMessage);
       if (selectedMsg) {
         addMessage({
           customerName: 'Support Team',
-          customerId: 0, // System message
+          customerId: 0,
           message: newMessageText
         });
         setNewMessageText('');
+        toast.success('Message sent successfully');
       }
     }
+  };
+
+  const handleMarkAllRead = () => {
+    messages.filter(m => !m.isRead).forEach(message => {
+      markMessageAsRead(message.id);
+    });
+    toast.success('All messages marked as read');
+  };
+
+  const handleSaveSettings = () => {
+    if (user?.isGuest) {
+      toast.error('Settings cannot be saved for guest users');
+      return;
+    }
+    
+    // Here you would typically save to backend
+    toast.success('Settings saved successfully');
+  };
+
+  const handleNotificationToggle = (key: string) => {
+    setSettings(prev => ({
+      ...prev,
+      notifications: {
+        ...prev.notifications,
+        [key]: !prev.notifications[key as keyof typeof prev.notifications]
+      }
+    }));
   };
 
   return (
@@ -223,18 +268,24 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
+                  {[
+                    { type: 'order', message: 'New order received', details: 'Order #1234 - $42.50', time: '2 min ago' },
+                    { type: 'payment', message: 'Payment confirmed', details: 'Order #1233 - $28.75', time: '15 min ago' },
+                    { type: 'message', message: 'New customer message', details: 'Question about delivery', time: '1 hour ago' }
+                  ].map((activity, i) => (
                     <div key={i} className="flex items-center justify-between p-3 bg-black/5 rounded-xl">
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-black/10 rounded-full flex items-center justify-center">
-                          <Package className="h-4 w-4 text-black" />
+                          {activity.type === 'order' && <Package className="h-4 w-4 text-black" />}
+                          {activity.type === 'payment' && <DollarSign className="h-4 w-4 text-black" />}
+                          {activity.type === 'message' && <MessageSquare className="h-4 w-4 text-black" />}
                         </div>
                         <div>
-                          <p className="font-medium text-black">New order received</p>
-                          <p className="text-sm text-black/60">Order #1234 - $42.50</p>
+                          <p className="font-medium text-black">{activity.message}</p>
+                          <p className="text-sm text-black/60">{activity.details}</p>
                         </div>
                       </div>
-                      <span className="text-xs text-black/50">2 min ago</span>
+                      <span className="text-xs text-black/50">{activity.time}</span>
                     </div>
                   ))}
                 </div>
@@ -257,7 +308,8 @@ const Dashboard = () => {
               <h2 className="text-3xl font-bold text-black">Messages</h2>
               <Button 
                 className="bg-black hover:bg-gray-800 text-white rounded-xl"
-                onClick={() => markMessageAsRead(messages.filter(m => !m.isRead)[0]?.id)}
+                onClick={handleMarkAllRead}
+                disabled={unreadMessages.length === 0}
               >
                 Mark All Read
               </Button>
@@ -276,8 +328,8 @@ const Dashboard = () => {
                   {messages.map((message) => (
                     <div 
                       key={message.id} 
-                      className={`p-3 hover:bg-black/5 rounded-xl cursor-pointer border border-gray-200/50 ${
-                        selectedMessage === message.id ? 'bg-black/10' : ''
+                      className={`p-3 hover:bg-black/5 rounded-xl cursor-pointer border border-gray-200/50 transition-all duration-200 ${
+                        selectedMessage === message.id ? 'bg-black/10 border-black/20' : ''
                       }`}
                       onClick={() => {
                         setSelectedMessage(message.id);
@@ -305,9 +357,11 @@ const Dashboard = () => {
                     <span>
                       {selectedMessage ? `Chat with ${messages.find(m => m.id === selectedMessage)?.customerName}` : 'Select a conversation'}
                     </span>
-                    <Button variant="ghost" size="sm">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
+                    {selectedMessage && (
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -342,6 +396,7 @@ const Dashboard = () => {
                         <Button 
                           className="bg-black hover:bg-gray-800 text-white rounded-xl"
                           onClick={handleSendMessage}
+                          disabled={!newMessageText.trim()}
                         >
                           Send
                         </Button>
@@ -543,22 +598,26 @@ const Dashboard = () => {
         )}
 
         {activeTab === 'settings' && (
-          <div>
-            <h2 className="text-2xl font-bold mb-6 text-black">Settings</h2>
-            <Card className="glass-morphism border-gray-200/50">
-              <CardHeader>
-                <CardTitle className="text-black">{user?.role === 'admin' ? 'Application Settings' : 'Store Settings'}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+          <div className="space-y-6">
+            <h2 className="text-3xl font-bold text-black">Settings</h2>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="glass-morphism border-gray-200/50">
+                <CardHeader>
+                  <CardTitle className="text-black">
+                    {user?.role === 'admin' ? 'Application Settings' : 'Store Settings'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium mb-2 text-black">
                       {user?.role === 'admin' ? 'Restaurant Name' : 'Store Name'}
                     </label>
-                    <input 
+                    <Input 
                       type="text" 
-                      className="w-full p-2 border border-gray-300 rounded-lg bg-white/70"
-                      defaultValue={user?.role === 'admin' ? 'GourmetGo' : user?.storeName || ''}
+                      className="w-full rounded-xl bg-white/70 border-gray-300"
+                      value={settings.restaurantName}
+                      onChange={(e) => setSettings(prev => ({ ...prev, restaurantName: e.target.value }))}
                       disabled={user?.isGuest}
                     />
                   </div>
@@ -566,47 +625,77 @@ const Dashboard = () => {
                     <label className="block text-sm font-medium mb-2 text-black">
                       Contact Email
                     </label>
-                    <input 
+                    <Input 
                       type="email" 
-                      className="w-full p-2 border border-gray-300 rounded-lg bg-white/70"
-                      defaultValue={user?.email || ''}
+                      className="w-full rounded-xl bg-white/70 border-gray-300"
+                      value={settings.email}
+                      onChange={(e) => setSettings(prev => ({ ...prev, email: e.target.value }))}
                       disabled={user?.isGuest}
                     />
                   </div>
-                  {user?.phoneNumber && (
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-black">
-                        Phone Number
-                      </label>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-black">
+                      Phone Number
+                    </label>
+                    <Input 
+                      type="tel" 
+                      className="w-full rounded-xl bg-white/70 border-gray-300"
+                      value={settings.phone}
+                      onChange={(e) => setSettings(prev => ({ ...prev, phone: e.target.value }))}
+                      disabled={user?.isGuest}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-black">
+                      Location
+                    </label>
+                    <Input 
+                      className="w-full rounded-xl bg-white/70 border-gray-300"
+                      value={settings.location}
+                      onChange={(e) => setSettings(prev => ({ ...prev, location: e.target.value }))}
+                      disabled={user?.isGuest}
+                    />
+                  </div>
+                  <div className="pt-4">
+                    {!user?.isGuest ? (
+                      <Button 
+                        className="bg-black hover:bg-gray-800 text-white rounded-xl"
+                        onClick={handleSaveSettings}
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Settings
+                      </Button>
+                    ) : (
+                      <p className="text-sm text-black/50">
+                        Settings are read-only for guest users. Create an account to edit settings.
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-morphism border-gray-200/50">
+                <CardHeader>
+                  <CardTitle className="text-black">Notification Preferences</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {Object.entries(settings.notifications).map(([key, value]) => (
+                    <div key={key} className="flex items-center justify-between p-3 bg-black/5 rounded-xl">
+                      <span className="text-sm text-black capitalize">
+                        {key.replace(/([A-Z])/g, ' $1').trim()}
+                      </span>
                       <input 
-                        type="tel" 
-                        className="w-full p-2 border border-gray-300 rounded-lg bg-white/70"
-                        defaultValue={user.phoneNumber}
+                        type="checkbox" 
+                        checked={value}
+                        onChange={() => handleNotificationToggle(key)}
+                        className="rounded" 
                         disabled={user?.isGuest}
                       />
                     </div>
-                  )}
-                  {user?.location && (
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-black">
-                        Location
-                      </label>
-                      <textarea 
-                        className="w-full p-2 border border-gray-300 rounded-lg bg-white/70"
-                        defaultValue={user.location}
-                        disabled={user?.isGuest}
-                      />
-                    </div>
-                  )}
-                  {!user?.isGuest && <Button className="bg-black hover:bg-gray-800 text-white">Save Settings</Button>}
-                  {user?.isGuest && (
-                    <p className="text-sm text-black/50">
-                      Settings are read-only for guest users. Create an account to edit settings.
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
           </div>
         )}
       </div>
