@@ -36,6 +36,15 @@ const Dashboard = () => {
   ]);
   const [selectedSupplier, setSelectedSupplier] = useState<number | null>(null);
   const [supplierMessageText, setSupplierMessageText] = useState('');
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: 'New Order Received', message: 'Order #1234 has been placed', time: '5 min ago', type: 'order', isRead: false },
+    { id: 2, title: 'Payment Confirmed', message: 'Payment for Order #1233 received', time: '15 min ago', type: 'payment', isRead: false },
+    { id: 3, title: 'Supplier Update', message: 'Mario\'s Pizzeria updated their menu', time: '1 hour ago', type: 'update', isRead: true },
+    { id: 4, title: 'System Maintenance', message: 'Scheduled maintenance tonight at 2 AM', time: '2 hours ago', type: 'system', isRead: false },
+    { id: 5, title: 'New Review', message: 'Customer left a 5-star review', time: '3 hours ago', type: 'review', isRead: true },
+    { id: 6, title: 'Low Stock Alert', message: 'Pizza dough running low', time: '4 hours ago', type: 'alert', isRead: false },
+    { id: 7, title: 'Weekly Report', message: 'Your weekly performance report is ready', time: '1 day ago', type: 'report', isRead: true },
+  ]);
   const [settings, setSettings] = useState({
     restaurantName: user?.role === 'admin' ? 'GourmetGo' : user?.storeName || '',
     email: user?.email || '',
@@ -51,6 +60,7 @@ const Dashboard = () => {
   });
 
   const unreadMessages = messages.filter(m => !m.isRead);
+  const unreadNotifications = notifications.filter(n => !n.isRead);
 
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
@@ -86,7 +96,7 @@ const Dashboard = () => {
       if (selectedMsg) {
         addMessage({
           customerName: 'Support Team',
-          customerId: 0,
+          customerId: selectedMsg.customerId,
           message: newMessageText
         });
         setNewMessageText('');
@@ -120,13 +130,42 @@ const Dashboard = () => {
     }
   };
 
+  const handleMessageSupplier = (supplierId: number) => {
+    const supplier = suppliers.find(s => s.id === supplierId);
+    if (supplier) {
+      // Check if conversation already exists
+      const existingConversation = messages.find(m => m.customerId === supplierId + 1000);
+      if (!existingConversation) {
+        // Create a new message thread with the supplier
+        addMessage({
+          customerName: supplier.name,
+          customerId: supplierId + 1000, // Use a unique ID for suppliers
+          message: `Started conversation with ${supplier.name}`
+        });
+      }
+      
+      // Switch to messages tab and select this conversation
+      setActiveTab('messages');
+      
+      // Find the newly created or existing message and select it
+      setTimeout(() => {
+        const newMessage = messages.find(m => m.customerId === supplierId + 1000);
+        if (newMessage) {
+          setSelectedMessage(newMessage.id);
+        }
+      }, 100);
+      
+      toast.success(`Started conversation with ${supplier.name}`);
+    }
+  };
+
   const handleSendSupplierMessage = () => {
     if (supplierMessageText.trim() && selectedSupplier) {
       const supplier = suppliers.find(s => s.id === selectedSupplier);
       if (supplier) {
         addMessage({
-          customerName: `Message to ${supplier.name}`,
-          customerId: selectedSupplier,
+          customerName: supplier.name,
+          customerId: selectedSupplier + 1000,
           message: supplierMessageText
         });
         setSupplierMessageText('');
@@ -152,6 +191,36 @@ const Dashboard = () => {
         [key]: !prev.notifications[key as keyof typeof prev.notifications]
       }
     }));
+  };
+
+  const markNotificationAsRead = (notificationId: number) => {
+    setNotifications(prev => 
+      prev.map(notification => 
+        notification.id === notificationId 
+          ? { ...notification, isRead: true }
+          : notification
+      )
+    );
+  };
+
+  const markAllNotificationsAsRead = () => {
+    setNotifications(prev => 
+      prev.map(notification => ({ ...notification, isRead: true }))
+    );
+    toast.success('All notifications marked as read');
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'order': return <ShoppingCart className="h-4 w-4" />;
+      case 'payment': return <DollarSign className="h-4 w-4" />;
+      case 'update': return <Bell className="h-4 w-4" />;
+      case 'system': return <Settings className="h-4 w-4" />;
+      case 'review': return <Star className="h-4 w-4" />;
+      case 'alert': return <Bell className="h-4 w-4" />;
+      case 'report': return <BarChart3 className="h-4 w-4" />;
+      default: return <Bell className="h-4 w-4" />;
+    }
   };
 
   return (
@@ -200,8 +269,8 @@ const Dashboard = () => {
                 {item.id === 'messages' && unreadMessages.length > 0 && (
                   <Badge className="ml-auto bg-red-500 text-white text-xs">{unreadMessages.length}</Badge>
                 )}
-                {item.id === 'notifications' && (
-                  <Badge className="ml-auto bg-orange-500 text-white text-xs">7</Badge>
+                {item.id === 'notifications' && unreadNotifications.length > 0 && (
+                  <Badge className="ml-auto bg-orange-500 text-white text-xs">{unreadNotifications.length}</Badge>
                 )}
               </button>
             );
@@ -355,6 +424,60 @@ const Dashboard = () => {
           <Analytics />
         )}
 
+        {activeTab === 'notifications' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-3xl font-bold text-black">Notifications</h2>
+              <Button 
+                className="bg-black hover:bg-gray-800 text-white rounded-xl"
+                onClick={markAllNotificationsAsRead}
+                disabled={unreadNotifications.length === 0}
+              >
+                Mark All Read
+              </Button>
+            </div>
+
+            <Card className="glass-morphism border-gray-200/50">
+              <CardHeader>
+                <CardTitle className="text-black">Recent Notifications</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {notifications.map((notification) => (
+                  <div 
+                    key={notification.id}
+                    className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 ${
+                      notification.isRead 
+                        ? 'border-gray-200/50 bg-white/50' 
+                        : 'border-orange-200 bg-orange-50/50'
+                    }`}
+                    onClick={() => markNotificationAsRead(notification.id)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start space-x-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          notification.isRead ? 'bg-gray-100' : 'bg-orange-100'
+                        }`}>
+                          {getNotificationIcon(notification.type)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2">
+                            <p className="font-semibold text-black">{notification.title}</p>
+                            {!notification.isRead && (
+                              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            )}
+                          </div>
+                          <p className="text-sm text-black/70 mt-1">{notification.message}</p>
+                          <p className="text-xs text-black/50 mt-2">{notification.time}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {activeTab === 'messages' && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -479,25 +602,34 @@ const Dashboard = () => {
                   {suppliers.map((supplier) => (
                     <div 
                       key={supplier.id}
-                      className={`p-4 border rounded-xl cursor-pointer transition-all duration-200 ${
+                      className={`p-4 border rounded-xl transition-all duration-200 ${
                         selectedSupplier === supplier.id 
                           ? 'border-black bg-black/5' 
                           : 'border-gray-200/50 hover:bg-black/5'
                       }`}
-                      onClick={() => setSelectedSupplier(supplier.id)}
                     >
                       <div className="flex justify-between items-start mb-3">
                         <div>
                           <p className="font-semibold text-black text-lg">{supplier.name}</p>
                           <p className="text-sm text-black/60">{supplier.cuisine}</p>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-sm ${
-                          supplier.status === 'Active' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {supplier.status}
-                        </span>
+                        <div className="flex items-center space-x-2">
+                          <span className={`px-3 py-1 rounded-full text-sm ${
+                            supplier.status === 'Active' 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {supplier.status}
+                          </span>
+                          <Button
+                            size="sm"
+                            className="bg-black hover:bg-gray-800 text-white rounded-lg"
+                            onClick={() => handleMessageSupplier(supplier.id)}
+                          >
+                            <MessageSquare className="h-4 w-4 mr-1" />
+                            Message
+                          </Button>
+                        </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="flex items-center space-x-2">
@@ -520,38 +652,21 @@ const Dashboard = () => {
 
               <Card className="glass-morphism border-gray-200/50">
                 <CardHeader>
-                  <CardTitle className="text-black">
-                    {selectedSupplier ? `Message ${suppliers.find(s => s.id === selectedSupplier)?.name}` : 'Select Supplier'}
-                  </CardTitle>
+                  <CardTitle className="text-black">Quick Actions</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  {selectedSupplier ? (
-                    <div className="space-y-4">
-                      <div className="h-32 bg-black/5 rounded-xl p-4 overflow-y-auto">
-                        <p className="text-sm text-gray-500 text-center">No previous messages</p>
-                      </div>
-                      <div className="space-y-2">
-                        <Input 
-                          className="rounded-xl bg-white/70 border-gray-300" 
-                          placeholder="Type your message..."
-                          value={supplierMessageText}
-                          onChange={(e) => setSupplierMessageText(e.target.value)}
-                          onKeyPress={(e) => e.key === 'Enter' && handleSendSupplierMessage()}
-                        />
-                        <Button 
-                          className="w-full bg-black hover:bg-gray-800 text-white rounded-xl"
-                          onClick={handleSendSupplierMessage}
-                          disabled={!supplierMessageText.trim()}
-                        >
-                          Send Message
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="h-48 flex items-center justify-center text-gray-500">
-                      <p className="text-center">Select a supplier to start messaging</p>
-                    </div>
-                  )}
+                <CardContent className="space-y-4">
+                  <Button className="w-full bg-black hover:bg-gray-800 text-white rounded-xl">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add New Supplier
+                  </Button>
+                  <Button variant="outline" className="w-full rounded-xl border-gray-300">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Import Suppliers
+                  </Button>
+                  <Button variant="outline" className="w-full rounded-xl border-gray-300">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    View Reports
+                  </Button>
                 </CardContent>
               </Card>
             </div>
