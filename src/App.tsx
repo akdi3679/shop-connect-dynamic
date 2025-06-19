@@ -7,17 +7,19 @@ import { ProductProvider } from '@/contexts/ProductContext';
 import { ThemeProvider } from '@/components/theme-provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LoadingScreen } from '@/components/LoadingScreen';
-import { AuthWrapper } from '@/components/AuthWrapper';
+import AuthWrapper from '@/components/AuthWrapper';
 import Index from '@/pages/Index';
 import Dashboard from '@/pages/Dashboard';
 import NotFound from '@/pages/NotFound';
 import { initializeLocationService } from '@/utils/locationService';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 
 const queryClient = new QueryClient();
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
   // Initialize location service when app loads
   useEffect(() => {
     // Small delay to ensure the app is fully loaded
@@ -27,6 +29,14 @@ function App() {
 
     return () => clearTimeout(timer);
   }, []);
+
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+  };
+
+  if (isLoading) {
+    return <LoadingScreen onLoadingComplete={handleLoadingComplete} />;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -49,7 +59,6 @@ function App() {
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                   <Toaster />
-                  <LoadingScreen />
                 </div>
               </Router>
             </ProductProvider>
