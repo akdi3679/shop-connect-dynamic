@@ -21,6 +21,21 @@ const Dashboard = () => {
   const { messages, markMessageAsRead, addMessage } = useProducts();
   const [selectedMessage, setSelectedMessage] = useState<number | null>(null);
   const [newMessageText, setNewMessageText] = useState('');
+  const [newEventTitle, setNewEventTitle] = useState('');
+  const [newEventDate, setNewEventDate] = useState('');
+  const [newEventTime, setNewEventTime] = useState('');
+  const [events, setEvents] = useState([
+    { id: 1, title: 'Team Meeting', time: 'Today, 2:00 PM', type: 'meeting' },
+    { id: 2, title: 'Product Launch', time: 'Tomorrow, 10:00 AM', type: 'event' },
+    { id: 3, title: 'Supplier Review', time: 'Friday, 3:00 PM', type: 'review' },
+  ]);
+  const [suppliers, setSuppliers] = useState([
+    { id: 1, name: "Mario's Pizzeria", cuisine: 'Italian Cuisine', status: 'Active', phone: '+1 234-567-8901', email: 'mario@pizzeria.com', location: 'Downtown District' },
+    { id: 2, name: "Sushi Master", cuisine: 'Japanese Cuisine', status: 'Active', phone: '+1 234-567-8902', email: 'info@sushimaster.com', location: 'City Center' },
+    { id: 3, name: "Burger House", cuisine: 'American Cuisine', status: 'Active', phone: '+1 234-567-8903', email: 'orders@burgerhouse.com', location: 'Mall Area' },
+  ]);
+  const [selectedSupplier, setSelectedSupplier] = useState<number | null>(null);
+  const [supplierMessageText, setSupplierMessageText] = useState('');
   const [settings, setSettings] = useState({
     restaurantName: user?.role === 'admin' ? 'GourmetGo' : user?.storeName || '',
     email: user?.email || '',
@@ -87,13 +102,45 @@ const Dashboard = () => {
     toast.success('All messages marked as read');
   };
 
+  const handleAddEvent = () => {
+    if (newEventTitle.trim() && newEventDate && newEventTime) {
+      const newEvent = {
+        id: events.length + 1,
+        title: newEventTitle,
+        time: `${newEventDate}, ${newEventTime}`,
+        type: 'event'
+      };
+      setEvents([...events, newEvent]);
+      setNewEventTitle('');
+      setNewEventDate('');
+      setNewEventTime('');
+      toast.success('Event added successfully');
+    } else {
+      toast.error('Please fill in all event details');
+    }
+  };
+
+  const handleSendSupplierMessage = () => {
+    if (supplierMessageText.trim() && selectedSupplier) {
+      const supplier = suppliers.find(s => s.id === selectedSupplier);
+      if (supplier) {
+        addMessage({
+          customerName: `Message to ${supplier.name}`,
+          customerId: selectedSupplier,
+          message: supplierMessageText
+        });
+        setSupplierMessageText('');
+        toast.success(`Message sent to ${supplier.name}`);
+      }
+    }
+  };
+
   const handleSaveSettings = () => {
     if (user?.isGuest) {
       toast.error('Settings cannot be saved for guest users');
       return;
     }
     
-    // Here you would typically save to backend
     toast.success('Settings saved successfully');
   };
 
@@ -190,7 +237,13 @@ const Dashboard = () => {
                 Dashboard Overview
               </h2>
               <div className="flex items-center space-x-3">
-                <Button size="sm" className="bg-black hover:bg-gray-800 text-white rounded-xl">
+                <Button 
+                  size="sm" 
+                  className="bg-black hover:bg-gray-800 text-white rounded-xl"
+                  onClick={() => {
+                    toast.success('New item added successfully');
+                  }}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Add New
                 </Button>
@@ -413,46 +466,52 @@ const Dashboard = () => {
           </div>
         )}
 
-        {activeTab === 'notifications' && (
+        {activeTab === 'suppliers' && user?.role === 'admin' && (
           <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-black">Notifications</h2>
+            <h2 className="text-3xl font-bold text-black">Supplier Management</h2>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="lg:col-span-2 glass-morphism border-gray-200/50">
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between text-black">
-                    Recent Notifications
-                    <Button variant="ghost" size="sm">Mark all read</Button>
-                  </CardTitle>
+                  <CardTitle className="text-black">Active Suppliers</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  {[
-                    { type: 'order', message: 'New order received from John Doe', time: '5 min ago', unread: true },
-                    { type: 'payment', message: 'Payment confirmed for order #1234', time: '1 hour ago', unread: true },
-                    { type: 'review', message: 'New 5-star review received', time: '2 hours ago', unread: false },
-                    { type: 'system', message: 'System maintenance scheduled', time: '1 day ago', unread: false },
-                  ].map((notification, i) => (
-                    <div key={i} className={`p-4 rounded-xl border ${notification.unread ? 'bg-black/5 border-black/20' : 'bg-gray-50 border-gray-200'}`}>
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-3">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                            notification.type === 'order' ? 'bg-green-100' :
-                            notification.type === 'payment' ? 'bg-blue-100' :
-                            notification.type === 'review' ? 'bg-yellow-100' : 'bg-gray-100'
-                          }`}>
-                            {notification.type === 'order' && <Package className="h-4 w-4 text-green-600" />}
-                            {notification.type === 'payment' && <DollarSign className="h-4 w-4 text-blue-600" />}
-                            {notification.type === 'review' && <Star className="h-4 w-4 text-yellow-600" />}
-                            {notification.type === 'system' && <Settings className="h-4 w-4 text-gray-600" />}
-                          </div>
-                          <div>
-                            <p className="font-medium text-black">{notification.message}</p>
-                            <p className="text-sm text-black/60">{notification.time}</p>
-                          </div>
+                <CardContent className="space-y-4">
+                  {suppliers.map((supplier) => (
+                    <div 
+                      key={supplier.id}
+                      className={`p-4 border rounded-xl cursor-pointer transition-all duration-200 ${
+                        selectedSupplier === supplier.id 
+                          ? 'border-black bg-black/5' 
+                          : 'border-gray-200/50 hover:bg-black/5'
+                      }`}
+                      onClick={() => setSelectedSupplier(supplier.id)}
+                    >
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <p className="font-semibold text-black text-lg">{supplier.name}</p>
+                          <p className="text-sm text-black/60">{supplier.cuisine}</p>
                         </div>
-                        {notification.unread && (
-                          <div className="w-2 h-2 bg-black rounded-full"></div>
-                        )}
+                        <span className={`px-3 py-1 rounded-full text-sm ${
+                          supplier.status === 'Active' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {supplier.status}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="flex items-center space-x-2">
+                          <Phone className="h-4 w-4 text-gray-500" />
+                          <span className="text-black/70">{supplier.phone}</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Mail className="h-4 w-4 text-gray-500" />
+                          <span className="text-black/70">{supplier.email}</span>
+                        </div>
+                        <div className="flex items-center space-x-2 col-span-2">
+                          <MapPin className="h-4 w-4 text-gray-500" />
+                          <span className="text-black/70">{supplier.location}</span>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -461,21 +520,38 @@ const Dashboard = () => {
 
               <Card className="glass-morphism border-gray-200/50">
                 <CardHeader>
-                  <CardTitle className="text-black">Notification Settings</CardTitle>
+                  <CardTitle className="text-black">
+                    {selectedSupplier ? `Message ${suppliers.find(s => s.id === selectedSupplier)?.name}` : 'Select Supplier'}
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    'New orders',
-                    'Payment confirmations',
-                    'Customer messages',
-                    'System updates',
-                    'Marketing emails'
-                  ].map((setting, i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <span className="text-sm text-black">{setting}</span>
-                      <input type="checkbox" defaultChecked={i < 3} className="rounded" />
+                <CardContent>
+                  {selectedSupplier ? (
+                    <div className="space-y-4">
+                      <div className="h-32 bg-black/5 rounded-xl p-4 overflow-y-auto">
+                        <p className="text-sm text-gray-500 text-center">No previous messages</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Input 
+                          className="rounded-xl bg-white/70 border-gray-300" 
+                          placeholder="Type your message..."
+                          value={supplierMessageText}
+                          onChange={(e) => setSupplierMessageText(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleSendSupplierMessage()}
+                        />
+                        <Button 
+                          className="w-full bg-black hover:bg-gray-800 text-white rounded-xl"
+                          onClick={handleSendSupplierMessage}
+                          disabled={!supplierMessageText.trim()}
+                        >
+                          Send Message
+                        </Button>
+                      </div>
                     </div>
-                  ))}
+                  ) : (
+                    <div className="h-48 flex items-center justify-center text-gray-500">
+                      <p className="text-center">Select a supplier to start messaging</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -484,29 +560,48 @@ const Dashboard = () => {
 
         {activeTab === 'calendar' && (
           <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-black">Calendar & Events</h2>
+            <div className="flex justify-between items-center">
+              <h2 className="text-3xl font-bold text-black">Calendar & Events</h2>
+              <div className="flex space-x-2">
+                <Input 
+                  className="rounded-xl bg-white/70 border-gray-300"
+                  placeholder="Event title"
+                  value={newEventTitle}
+                  onChange={(e) => setNewEventTitle(e.target.value)}
+                />
+                <Input 
+                  type="date"
+                  className="rounded-xl bg-white/70 border-gray-300"
+                  value={newEventDate}
+                  onChange={(e) => setNewEventDate(e.target.value)}
+                />
+                <Input 
+                  type="time"
+                  className="rounded-xl bg-white/70 border-gray-300"
+                  value={newEventTime}
+                  onChange={(e) => setNewEventTime(e.target.value)}
+                />
+                <Button 
+                  className="bg-black hover:bg-gray-800 text-white rounded-xl"
+                  onClick={handleAddEvent}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Event
+                </Button>
+              </div>
+            </div>
 
             <Card className="glass-morphism border-gray-200/50">
               <CardHeader>
-                <CardTitle className="flex items-center justify-between text-black">
-                  <span className="flex items-center">
-                    <Calendar className="h-5 w-5 mr-2" />
-                    Upcoming Events
-                  </span>
-                  <Button className="bg-black hover:bg-gray-800 text-white rounded-xl">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Event
-                  </Button>
+                <CardTitle className="flex items-center text-black">
+                  <Calendar className="h-5 w-5 mr-2" />
+                  Upcoming Events
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[
-                    { title: 'Team Meeting', time: 'Today, 2:00 PM', type: 'meeting' },
-                    { title: 'Product Launch', time: 'Tomorrow, 10:00 AM', type: 'event' },
-                    { title: 'Supplier Review', time: 'Friday, 3:00 PM', type: 'review' },
-                  ].map((event, i) => (
-                    <div key={i} className="flex items-center justify-between p-4 bg-black/5 rounded-xl">
+                  {events.map((event) => (
+                    <div key={event.id} className="flex items-center justify-between p-4 bg-black/5 rounded-xl">
                       <div className="flex items-center space-x-3">
                         <div className="w-3 h-3 bg-black rounded-full"></div>
                         <div>
@@ -514,8 +609,15 @@ const Dashboard = () => {
                           <p className="text-sm text-black/60">{event.time}</p>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm">
-                        <Eye className="h-4 w-4" />
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          setEvents(events.filter(e => e.id !== event.id));
+                          toast.success('Event removed');
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   ))}
@@ -556,39 +658,6 @@ const Dashboard = () => {
                     </div>
                     <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
                       Preparing
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {activeTab === 'suppliers' && user?.role === 'admin' && (
-          <div>
-            <h2 className="text-2xl font-bold mb-6 text-black">Supplier Management</h2>
-            <Card className="glass-morphism border-gray-200/50">
-              <CardHeader>
-                <CardTitle className="text-black">Active Suppliers</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center p-4 border border-gray-200/50 rounded-lg">
-                    <div>
-                      <p className="font-semibold text-black">Mario's Pizzeria</p>
-                      <p className="text-sm text-black/60">Italian Cuisine</p>
-                    </div>
-                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                      Active
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center p-4 border border-gray-200/50 rounded-lg">
-                    <div>
-                      <p className="font-semibold text-black">Sushi Master</p>
-                      <p className="text-sm text-black/60">Japanese Cuisine</p>
-                    </div>
-                    <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                      Active
                     </span>
                   </div>
                 </div>

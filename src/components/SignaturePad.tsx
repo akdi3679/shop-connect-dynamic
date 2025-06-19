@@ -174,31 +174,35 @@ export const SignaturePad = ({ onSignatureChange, onClose, existingSignature }: 
 
   return (
     <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 border border-white/30">
-      <div className="relative flex justify-center">
-        {!hasDrawn && !existingSignature && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-            <div className="w-8 h-8 opacity-30">
-              <DefaultSignatureIcon />
+      {/* Canvas Container - Centered */}
+      <div className="flex justify-center mb-2">
+        <div className="relative">
+          {!hasDrawn && !existingSignature && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+              <div className="w-8 h-8 opacity-30">
+                <DefaultSignatureIcon />
+              </div>
             </div>
-          </div>
-        )}
-        
-        <canvas
-          ref={canvasRef}
-          className="bg-transparent touch-none border-0"
-          style={{ height: '100px', width: '300px' }}
-          onMouseDown={startDrawing}
-          onMouseMove={draw}
-          onMouseUp={stopDrawing}
-          onMouseOut={stopDrawing}
-          onTouchStart={startDrawing}
-          onTouchMove={draw}
-          onTouchEnd={stopDrawing}
-          onTouchCancel={stopDrawing}
-        />
+          )}
+          
+          <canvas
+            ref={canvasRef}
+            className="bg-transparent touch-none border-0"
+            style={{ height: '100px', width: '300px' }}
+            onMouseDown={startDrawing}
+            onMouseMove={draw}
+            onMouseUp={stopDrawing}
+            onMouseOut={stopDrawing}
+            onTouchStart={startDrawing}
+            onTouchMove={draw}
+            onTouchEnd={stopDrawing}
+            onTouchCancel={stopDrawing}
+          />
+        </div>
       </div>
       
-      <div className="flex justify-between mt-2">
+      {/* Buttons Container - Clear on left, Done on far right */}
+      <div className="flex justify-between items-center">
         <Button 
           variant="ghost" 
           size="sm"
@@ -211,7 +215,7 @@ export const SignaturePad = ({ onSignatureChange, onClose, existingSignature }: 
           variant="ghost" 
           size="sm"
           onClick={onClose}
-          className="text-xs h-6 px-2"
+          className="text-xs h-6 px-2 ml-auto"
         >
           Done
         </Button>
