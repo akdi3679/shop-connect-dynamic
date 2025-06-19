@@ -136,18 +136,30 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
         
         {/* Main Cart Content */}
         <div className={`transition-transform duration-500 ease-in-out ${showCheckout ? '-translate-x-full' : 'translate-x-0'} ${showSuccess ? '-translate-x-full' : ''}`}>
-          {cartItems.length > 0 && (
-            <Button
-              variant="ghost"
-              onClick={clearCart}
-              className="absolute top-5 right-14 text-sm font-medium text-black hover:text-red-600 hover:bg-red-50 px-2 py-1 h-auto rounded-md"
-            >
-              Clear
-            </Button>
-          )}
-          <SheetHeader className="pb-4">
+          {/* Header with Clear and Close buttons */}
+          <SheetHeader className="pb-4 relative">
             <SheetTitle className="text-xl font-bold text-black">Your Cart</SheetTitle>
+            {cartItems.length > 0 && (
+              <div className="absolute top-0 right-0 flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={clearCart}
+                  className="text-sm font-medium text-black hover:text-red-600 hover:bg-red-50 px-2 py-1 h-auto rounded-md"
+                >
+                  Clear
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onOpenChange(false)}
+                  className="text-black hover:text-gray-600 h-8 w-8"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </SheetHeader>
+          
           {cartItems.length > 0 ? (
             <>
               <ScrollArea className="flex-grow pr-4">
@@ -205,9 +217,9 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
                       </div>
                     </div>
                     
-                    {/* Signature Section */}
-                    <div className="mt-3 pt-3 border-t border-white/20">
-                      <div className="flex flex-col items-center space-y-2">
+                    {/* Signature Section - positioned on the right */}
+                    <div className="mt-3 pt-3 border-t border-white/20 flex justify-end">
+                      <div className="flex flex-col items-end space-y-2">
                         <Button 
                           variant="ghost" 
                           size="sm"
@@ -218,13 +230,13 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
                         </Button>
                         
                         {!showSignature && (
-                          <div className="flex justify-center w-full">
+                          <div className="flex justify-end">
                             {signature ? (
                               <div className="w-24 h-12 rounded bg-transparent flex items-center justify-center">
                                 <img src={signature} alt="Signature" className="max-w-full max-h-full object-contain" />
                               </div>
                             ) : (
-                              <div className="flex justify-center">
+                              <div className="flex justify-end">
                                 <DefaultSignatureIcon />
                               </div>
                             )}
