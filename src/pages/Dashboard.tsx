@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { 
   BarChart3, Package, Users, Settings, LogOut, Home, User, 
@@ -37,15 +36,6 @@ const Dashboard = () => {
   ]);
   const [selectedSupplier, setSelectedSupplier] = useState<number | null>(null);
   const [supplierMessageText, setSupplierMessageText] = useState('');
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: 'New Order Received', message: 'Order #1234 has been placed', time: '5 min ago', type: 'order', isRead: false },
-    { id: 2, title: 'Payment Confirmed', message: 'Payment for Order #1233 confirmed', time: '15 min ago', type: 'payment', isRead: false },
-    { id: 3, title: 'Supplier Message', message: 'New message from Mario\'s Pizzeria', time: '1 hour ago', type: 'message', isRead: true },
-    { id: 4, title: 'System Update', message: 'Dashboard has been updated with new features', time: '2 hours ago', type: 'system', isRead: false },
-    { id: 5, title: 'Low Stock Alert', message: 'Some products are running low on stock', time: '3 hours ago', type: 'alert', isRead: true },
-    { id: 6, title: 'New Customer', message: 'A new customer has registered', time: '4 hours ago', type: 'customer', isRead: false },
-    { id: 7, title: 'Review Received', message: 'You have received a new 5-star review', time: '5 hours ago', type: 'review', isRead: false },
-  ]);
   const [settings, setSettings] = useState({
     restaurantName: user?.role === 'admin' ? 'GourmetGo' : user?.storeName || '',
     email: user?.email || '',
@@ -61,7 +51,6 @@ const Dashboard = () => {
   });
 
   const unreadMessages = messages.filter(m => !m.isRead);
-  const unreadNotifications = notifications.filter(n => !n.isRead);
 
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
@@ -92,14 +81,17 @@ const Dashboard = () => {
   );
 
   const handleSendMessage = () => {
-    if (newMessageText.trim()) {
-      addMessage({
-        customerName: 'You',
-        customerId: 0,
-        message: newMessageText
-      });
-      setNewMessageText('');
-      toast.success('Message sent successfully');
+    if (newMessageText.trim() && selectedMessage) {
+      const selectedMsg = messages.find(m => m.id === selectedMessage);
+      if (selectedMsg) {
+        addMessage({
+          customerName: 'Support Team',
+          customerId: 0,
+          message: newMessageText
+        });
+        setNewMessageText('');
+        toast.success('Message sent successfully');
+      }
     }
   };
 
@@ -128,30 +120,13 @@ const Dashboard = () => {
     }
   };
 
-  const handleMessageSupplier = (supplierId: number) => {
-    const supplier = suppliers.find(s => s.id === supplierId);
-    if (supplier) {
-      // Create a new message thread with the supplier
-      addMessage({
-        customerName: supplier.name,
-        customerId: supplierId + 1000, // Offset to distinguish from regular customers
-        message: `Started conversation with ${supplier.name}`
-      });
-      
-      // Switch to messages tab and select this conversation
-      setActiveTab('messages');
-      setSelectedMessage(messages.length + 1);
-      toast.success(`Started conversation with ${supplier.name}`);
-    }
-  };
-
   const handleSendSupplierMessage = () => {
     if (supplierMessageText.trim() && selectedSupplier) {
       const supplier = suppliers.find(s => s.id === selectedSupplier);
       if (supplier) {
         addMessage({
-          customerName: supplier.name,
-          customerId: selectedSupplier + 1000,
+          customerName: `Message to ${supplier.name}`,
+          customerId: selectedSupplier,
           message: supplierMessageText
         });
         setSupplierMessageText('');
@@ -177,21 +152,6 @@ const Dashboard = () => {
         [key]: !prev.notifications[key as keyof typeof prev.notifications]
       }
     }));
-  };
-
-  const markNotificationAsRead = (notificationId: number) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === notificationId 
-          ? { ...notification, isRead: true }
-          : notification
-      )
-    );
-  };
-
-  const markAllNotificationsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-    toast.success('All notifications marked as read');
   };
 
   return (
@@ -240,8 +200,8 @@ const Dashboard = () => {
                 {item.id === 'messages' && unreadMessages.length > 0 && (
                   <Badge className="ml-auto bg-red-500 text-white text-xs">{unreadMessages.length}</Badge>
                 )}
-                {item.id === 'notifications' && unreadNotifications.length > 0 && (
-                  <Badge className="ml-auto bg-orange-500 text-white text-xs">{unreadNotifications.length}</Badge>
+                {item.id === 'notifications' && (
+                  <Badge className="ml-auto bg-orange-500 text-white text-xs">7</Badge>
                 )}
               </button>
             );
@@ -506,70 +466,12 @@ const Dashboard = () => {
           </div>
         )}
 
-        {activeTab === 'notifications' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-3xl font-bold text-black">Notifications</h2>
-              <Button 
-                className="bg-black hover:bg-gray-800 text-white rounded-xl"
-                onClick={markAllNotificationsRead}
-                disabled={unreadNotifications.length === 0}
-              >
-                Mark All Read
-              </Button>
-            </div>
-
-            <Card className="glass-morphism border-gray-200/50">
-              <CardHeader>
-                <CardTitle className="text-black">Recent Notifications</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {notifications.map((notification) => (
-                    <div 
-                      key={notification.id}
-                      className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 ${
-                        notification.isRead 
-                          ? 'bg-gray-50 border-gray-200' 
-                          : 'bg-blue-50 border-blue-200 hover:bg-blue-100'
-                      }`}
-                      onClick={() => markNotificationAsRead(notification.id)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-3">
-                          <div className={`w-2 h-2 rounded-full mt-2 ${
-                            notification.isRead ? 'bg-gray-400' : 'bg-blue-500'
-                          }`}></div>
-                          <div className="flex-1">
-                            <h4 className="font-medium text-black">{notification.title}</h4>
-                            <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
-                            <span className="text-xs text-gray-500 mt-2 block">{notification.time}</span>
-                          </div>
-                        </div>
-                        <div className={`px-2 py-1 rounded-full text-xs ${
-                          notification.type === 'order' ? 'bg-green-100 text-green-800' :
-                          notification.type === 'payment' ? 'bg-blue-100 text-blue-800' :
-                          notification.type === 'message' ? 'bg-purple-100 text-purple-800' :
-                          notification.type === 'alert' ? 'bg-red-100 text-red-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {notification.type}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
         {activeTab === 'suppliers' && user?.role === 'admin' && (
           <div className="space-y-6">
             <h2 className="text-3xl font-bold text-black">Supplier Management</h2>
 
-            <div className="grid grid-cols-1 gap-6">
-              <Card className="glass-morphism border-gray-200/50">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="lg:col-span-2 glass-morphism border-gray-200/50">
                 <CardHeader>
                   <CardTitle className="text-black">Active Suppliers</CardTitle>
                 </CardHeader>
@@ -577,30 +479,25 @@ const Dashboard = () => {
                   {suppliers.map((supplier) => (
                     <div 
                       key={supplier.id}
-                      className="p-4 border rounded-xl hover:bg-black/5 transition-all duration-200 border-gray-200/50"
+                      className={`p-4 border rounded-xl cursor-pointer transition-all duration-200 ${
+                        selectedSupplier === supplier.id 
+                          ? 'border-black bg-black/5' 
+                          : 'border-gray-200/50 hover:bg-black/5'
+                      }`}
+                      onClick={() => setSelectedSupplier(supplier.id)}
                     >
                       <div className="flex justify-between items-start mb-3">
-                        <div className="flex-1">
+                        <div>
                           <p className="font-semibold text-black text-lg">{supplier.name}</p>
                           <p className="text-sm text-black/60">{supplier.cuisine}</p>
                         </div>
-                        <div className="flex items-center space-x-3">
-                          <span className={`px-3 py-1 rounded-full text-sm ${
-                            supplier.status === 'Active' 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {supplier.status}
-                          </span>
-                          <Button
-                            size="sm"
-                            className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl"
-                            onClick={() => handleMessageSupplier(supplier.id)}
-                          >
-                            <MessageSquare className="h-4 w-4 mr-1" />
-                            Message
-                          </Button>
-                        </div>
+                        <span className={`px-3 py-1 rounded-full text-sm ${
+                          supplier.status === 'Active' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {supplier.status}
+                        </span>
                       </div>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="flex items-center space-x-2">
@@ -618,6 +515,43 @@ const Dashboard = () => {
                       </div>
                     </div>
                   ))}
+                </CardContent>
+              </Card>
+
+              <Card className="glass-morphism border-gray-200/50">
+                <CardHeader>
+                  <CardTitle className="text-black">
+                    {selectedSupplier ? `Message ${suppliers.find(s => s.id === selectedSupplier)?.name}` : 'Select Supplier'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {selectedSupplier ? (
+                    <div className="space-y-4">
+                      <div className="h-32 bg-black/5 rounded-xl p-4 overflow-y-auto">
+                        <p className="text-sm text-gray-500 text-center">No previous messages</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Input 
+                          className="rounded-xl bg-white/70 border-gray-300" 
+                          placeholder="Type your message..."
+                          value={supplierMessageText}
+                          onChange={(e) => setSupplierMessageText(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleSendSupplierMessage()}
+                        />
+                        <Button 
+                          className="w-full bg-black hover:bg-gray-800 text-white rounded-xl"
+                          onClick={handleSendSupplierMessage}
+                          disabled={!supplierMessageText.trim()}
+                        >
+                          Send Message
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-48 flex items-center justify-center text-gray-500">
+                      <p className="text-center">Select a supplier to start messaging</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
