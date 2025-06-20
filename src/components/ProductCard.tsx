@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useCart, Product } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import { soundManager } from '@/utils/sounds';
-import { Plus, ShoppingCart } from 'lucide-react';
+import { Plus, ShoppingCart, Flame } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -29,6 +29,18 @@ const CurrencyIcon = ({ className = "w-20 h-20", color = "currentColor" }: { cla
     >ا</text>
   </svg>
 );
+
+// Generate calories based on product type and price
+const getProductCalories = (name: string, price: number): number => {
+  const baseCalories = Math.round(price * 25); // Base calculation
+  
+  if (name.toLowerCase().includes('sandwich')) return baseCalories + Math.round(Math.random() * 100) + 250;
+  if (name.toLowerCase().includes('salad')) return Math.round(baseCalories * 0.6) + 150;
+  if (name.toLowerCase().includes('potato')) return baseCalories + Math.round(Math.random() * 150) + 200;
+  if (name.toLowerCase().includes('drink') || name.toLowerCase().includes('juice')) return Math.round(baseCalories * 0.4) + 50;
+  
+  return baseCalories + Math.round(Math.random() * 100) + 180;
+};
 
 export const ProductCard = ({ product, onNameClick, showDescription }: ProductCardProps) => {
   const { addToCart } = useCart();
@@ -75,6 +87,8 @@ export const ProductCard = ({ product, onNameClick, showDescription }: ProductCa
     return 'from-gray-100 to-gray-200';
   };
 
+  const calories = getProductCalories(product.name, product.price);
+
   return (
     <Card className={`group flex flex-col overflow-hidden transition-all duration-700 hover:scale-105 hover:shadow-2xl bg-gradient-to-br ${getProductGradient(product.name)} backdrop-blur-sm border border-black/10 hover:border-black/20 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_20px_60px_rgb(0,0,0,0.3)] relative h-full`}>
       <div className="relative aspect-video overflow-hidden rounded-t-3xl flex-1">
@@ -107,11 +121,19 @@ export const ProductCard = ({ product, onNameClick, showDescription }: ProductCa
             
             {/* Description that appears below the name */}
             <div className={`transition-all duration-300 overflow-hidden ${
-              showDescription ? 'max-h-20 opacity-100 mt-2' : 'max-h-0 opacity-0'
+              showDescription ? 'max-h-32 opacity-100 mt-2' : 'max-h-0 opacity-0'
             }`}>
-              <p className="text-sm text-white/90 leading-relaxed">
+              <p className="text-sm text-white/90 leading-relaxed mb-2">
                 {product.description || "Delicious and fresh, made with the finest ingredients for your enjoyment."}
               </p>
+              
+              {/* Calories info */}
+              <div className="flex items-center space-x-1 bg-orange-500/20 backdrop-blur-sm rounded-full px-2 py-1 inline-flex">
+                <Flame className="h-3 w-3 text-orange-400" />
+                <span className="text-xs font-medium text-white">
+                  {calories} cal
+                </span>
+              </div>
             </div>
           </div>
         </div>
