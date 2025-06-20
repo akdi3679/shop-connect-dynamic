@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useCart, Product } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import { soundManager } from '@/utils/sounds';
-import { Plus, ShoppingCart, Flame } from 'lucide-react';
+import { Plus, ShoppingCart } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -29,15 +29,6 @@ const CurrencyIcon = ({ className = "w-20 h-20", color = "currentColor" }: { cla
     >ا</text>
   </svg>
 );
-
-// Mock function to generate calories based on product name
-const getProductCalories = (name: string): number => {
-  if (name.toLowerCase().includes('sandwich')) return Math.floor(Math.random() * 200) + 350;
-  if (name.toLowerCase().includes('salad')) return Math.floor(Math.random() * 150) + 200;
-  if (name.toLowerCase().includes('potato')) return Math.floor(Math.random() * 100) + 250;
-  if (name.toLowerCase().includes('drink') || name.toLowerCase().includes('juice')) return Math.floor(Math.random() * 100) + 100;
-  return Math.floor(Math.random() * 300) + 250;
-};
 
 export const ProductCard = ({ product, onNameClick, showDescription }: ProductCardProps) => {
   const { addToCart } = useCart();
@@ -84,8 +75,6 @@ export const ProductCard = ({ product, onNameClick, showDescription }: ProductCa
     return 'from-gray-100 to-gray-200';
   };
 
-  const calories = getProductCalories(product.name);
-
   return (
     <Card className={`group flex flex-col overflow-hidden transition-all duration-700 hover:scale-105 hover:shadow-2xl bg-gradient-to-br ${getProductGradient(product.name)} backdrop-blur-sm border border-black/10 hover:border-black/20 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_20px_60px_rgb(0,0,0,0.3)] relative h-full`}>
       <div className="relative aspect-video overflow-hidden rounded-t-3xl flex-1">
@@ -120,14 +109,9 @@ export const ProductCard = ({ product, onNameClick, showDescription }: ProductCa
             <div className={`transition-all duration-300 overflow-hidden ${
               showDescription ? 'max-h-20 opacity-100 mt-2' : 'max-h-0 opacity-0'
             }`}>
-              <p className="text-sm text-white/90 leading-relaxed mb-2">
+              <p className="text-sm text-white/90 leading-relaxed">
                 {product.description || "Delicious and fresh, made with the finest ingredients for your enjoyment."}
               </p>
-              {/* Calories info */}
-              <div className="flex items-center gap-1 text-xs text-orange-300">
-                <Flame className="h-3 w-3" />
-                <span>{calories} calories</span>
-              </div>
             </div>
           </div>
         </div>
