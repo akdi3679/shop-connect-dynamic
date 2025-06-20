@@ -230,13 +230,13 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
                         </Button>
                         
                         {!showSignature && (
-                          <div className="flex justify-end">
+                          <div className="flex justify-center">
                             {signature ? (
                               <div className="w-24 h-12 rounded bg-transparent flex items-center justify-center">
                                 <img src={signature} alt="Signature" className="max-w-full max-h-full object-contain" />
                               </div>
                             ) : (
-                              <div className="flex justify-end">
+                              <div className="flex justify-center">
                                 <DefaultSignatureIcon />
                               </div>
                             )}
