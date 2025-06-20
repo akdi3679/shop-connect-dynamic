@@ -30,15 +30,13 @@ const CurrencyIcon = ({ className = "w-20 h-20", color = "currentColor" }: { cla
   </svg>
 );
 
-// Function to estimate calories based on product type
-const getEstimatedCalories = (productName: string): number => {
-  const name = productName.toLowerCase();
-  if (name.includes('sandwich')) return Math.floor(Math.random() * 200) + 400; // 400-600 cal
-  if (name.includes('salad')) return Math.floor(Math.random() * 150) + 200; // 200-350 cal
-  if (name.includes('potato')) return Math.floor(Math.random() * 100) + 250; // 250-350 cal
-  if (name.includes('drink') || name.includes('juice')) return Math.floor(Math.random() * 100) + 120; // 120-220 cal
-  if (name.includes('pizza')) return Math.floor(Math.random() * 300) + 500; // 500-800 cal
-  return Math.floor(Math.random() * 200) + 300; // Default 300-500 cal
+// Mock function to generate calories based on product name
+const getProductCalories = (name: string): number => {
+  if (name.toLowerCase().includes('sandwich')) return Math.floor(Math.random() * 200) + 350;
+  if (name.toLowerCase().includes('salad')) return Math.floor(Math.random() * 150) + 200;
+  if (name.toLowerCase().includes('potato')) return Math.floor(Math.random() * 100) + 250;
+  if (name.toLowerCase().includes('drink') || name.toLowerCase().includes('juice')) return Math.floor(Math.random() * 100) + 100;
+  return Math.floor(Math.random() * 300) + 250;
 };
 
 export const ProductCard = ({ product, onNameClick, showDescription }: ProductCardProps) => {
@@ -86,7 +84,7 @@ export const ProductCard = ({ product, onNameClick, showDescription }: ProductCa
     return 'from-gray-100 to-gray-200';
   };
 
-  const estimatedCalories = getEstimatedCalories(product.name);
+  const calories = getProductCalories(product.name);
 
   return (
     <Card className={`group flex flex-col overflow-hidden transition-all duration-700 hover:scale-105 hover:shadow-2xl bg-gradient-to-br ${getProductGradient(product.name)} backdrop-blur-sm border border-black/10 hover:border-black/20 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_20px_60px_rgb(0,0,0,0.3)] relative h-full`}>
@@ -118,19 +116,17 @@ export const ProductCard = ({ product, onNameClick, showDescription }: ProductCa
               {product.name}
             </h3>
             
-            {/* Description and calories that appear below the name */}
+            {/* Description that appears below the name */}
             <div className={`transition-all duration-300 overflow-hidden ${
-              showDescription ? 'max-h-32 opacity-100 mt-2' : 'max-h-0 opacity-0'
+              showDescription ? 'max-h-20 opacity-100 mt-2' : 'max-h-0 opacity-0'
             }`}>
               <p className="text-sm text-white/90 leading-relaxed mb-2">
                 {product.description || "Delicious and fresh, made with the finest ingredients for your enjoyment."}
               </p>
-              {/* Calories info with fire icon */}
-              <div className="flex items-center space-x-2 bg-orange-500/20 backdrop-blur-sm rounded-full px-3 py-1 border border-orange-300/30 w-fit">
-                <Flame className="h-4 w-4 text-orange-400" />
-                <span className="text-sm font-medium text-orange-200">
-                  {estimatedCalories} cal
-                </span>
+              {/* Calories info */}
+              <div className="flex items-center gap-1 text-xs text-orange-300">
+                <Flame className="h-3 w-3" />
+                <span>{calories} calories</span>
               </div>
             </div>
           </div>
