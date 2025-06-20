@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
@@ -136,7 +135,7 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
         
         {/* Main Cart Content */}
         <div className={`transition-transform duration-500 ease-in-out ${showCheckout ? '-translate-x-full' : 'translate-x-0'} ${showSuccess ? '-translate-x-full' : ''}`}>
-          {/* Header with Clear and Close buttons */}
+          {/* Header with Clear and Close buttons together */}
           <SheetHeader className="pb-4 relative">
             <SheetTitle className="text-xl font-bold text-black">Your Cart</SheetTitle>
             {cartItems.length > 0 && (
@@ -148,6 +147,18 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
                 >
                   Clear
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onOpenChange(false)}
+                  className="text-black hover:text-gray-600 h-8 w-8"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+            {cartItems.length === 0 && (
+              <div className="absolute top-0 right-0">
                 <Button
                   variant="ghost"
                   size="icon"
