@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
@@ -136,25 +135,17 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
         
         {/* Main Cart Content */}
         <div className={`transition-transform duration-500 ease-in-out ${showCheckout ? '-translate-x-full' : 'translate-x-0'} ${showSuccess ? '-translate-x-full' : ''}`}>
-          {/* Header with Clear and Close buttons */}
+          {/* Header with Clear button only (removed duplicate close button) */}
           <SheetHeader className="pb-4 relative">
             <SheetTitle className="text-xl font-bold text-black">Your Cart</SheetTitle>
             {cartItems.length > 0 && (
-              <div className="absolute top-0 right-0 flex items-center gap-2">
+              <div className="absolute top-0 right-0">
                 <Button
                   variant="ghost"
                   onClick={clearCart}
                   className="text-sm font-medium text-black hover:text-red-600 hover:bg-red-50 px-2 py-1 h-auto rounded-md"
                 >
                   Clear
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onOpenChange(false)}
-                  className="text-black hover:text-gray-600 h-8 w-8"
-                >
-                  <X className="h-4 w-4" />
                 </Button>
               </div>
             )}
@@ -217,42 +208,40 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
                       </div>
                     </div>
                     
-                    {/* Signature Section - positioned on the right */}
-                    <div className="mt-3 pt-3 border-t border-white/20 flex justify-end">
-                      <div className="flex flex-col items-end space-y-2">
+                    {/* Signature Section - using flexbox */}
+                    <div className="mt-3 pt-3 border-t border-white/20">
+                      <div className="flex items-center justify-between">
                         <Button 
                           variant="ghost" 
                           size="sm"
                           onClick={() => setShowSignature(!showSignature)}
-                          className="text-xs h-6 px-3 text-gray-600 hover:text-black"
+                          className="text-xs h-6 px-3 text-gray-600 hover:text-black flex items-center gap-1"
                         >
                           Sign
                         </Button>
                         
                         {!showSignature && (
-                          <div className="flex justify-end">
+                          <div className="flex items-center">
                             {signature ? (
                               <div className="w-24 h-12 rounded bg-transparent flex items-center justify-center">
                                 <img src={signature} alt="Signature" className="max-w-full max-h-full object-contain" />
                               </div>
                             ) : (
-                              <div className="flex justify-end">
-                                <DefaultSignatureIcon />
-                              </div>
+                              <DefaultSignatureIcon />
                             )}
                           </div>
                         )}
-                        
-                        {showSignature && (
-                          <div className="w-full">
-                            <SignaturePad 
-                              onSignatureChange={setSignature}
-                              onClose={() => setShowSignature(false)}
-                              existingSignature={signature}
-                            />
-                          </div>
-                        )}
                       </div>
+                      
+                      {showSignature && (
+                        <div className="w-full mt-2">
+                          <SignaturePad 
+                            onSignatureChange={setSignature}
+                            onClose={() => setShowSignature(false)}
+                            existingSignature={signature}
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                   <Button 

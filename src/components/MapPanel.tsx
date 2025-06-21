@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { X, Navigation, Clock } from 'lucide-react';
+import { X, Navigation, Clock, MapPin } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -110,111 +110,136 @@ export const MapPanel: React.FC<MapPanelProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-4xl h-[80vh] bg-white/95 backdrop-blur-lg border border-white/30 shadow-2xl rounded-3xl overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-              <Navigation className="h-5 w-5 text-white" />
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-5xl h-[85vh] bg-white/10 backdrop-blur-3xl border border-white/20 shadow-2xl rounded-[2.5rem] overflow-hidden animate-scale-in">
+        {/* iOS-style header */}
+        <div className="flex items-center justify-between p-6 pb-4 bg-white/5 backdrop-blur-sm border-b border-white/10">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+              <MapPin className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">Find Our Restaurants</h2>
-              <p className="text-sm text-gray-600">Locate the nearest GourmetGo restaurant</p>
+              <h1 className="text-2xl font-bold text-white tracking-tight">Find Restaurants</h1>
+              <p className="text-sm text-white/70 font-medium">Discover nearby GourmetGo locations</p>
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="rounded-full hover:bg-gray-100"
+            className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white transition-all duration-200"
           >
             <X className="h-5 w-5" />
           </Button>
         </div>
 
-        <CardContent className="p-0 h-full">
-          <div className="flex h-full">
-            {/* Map */}
-            <div className="flex-1 relative">
-              {isMapReady && userLocation ? (
-                <MapContainer
+        <div className="flex h-full">
+          {/* Map Container */}
+          <div className="flex-1 relative overflow-hidden rounded-bl-[2.5rem]">
+            {isMapReady && userLocation ? (
+              <MapContainer
+                center={userLocation}
+                zoom={12}
+                style={{ height: '100%', width: '100%' }}
+                className="rounded-bl-[2.5rem]"
+                key={`${userLocation[0]}-${userLocation[1]}`}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                
+                <Marker position={userLocation}>
+                  <Popup>
+                    <div className="text-center font-medium">
+                      <p className="text-blue-600">📍 Your Location</p>
+                    </div>
+                  </Popup>
+                </Marker>
+                <Circle
                   center={userLocation}
-                  zoom={12}
-                  style={{ height: '100%', width: '100%' }}
-                  className="rounded-bl-3xl"
-                  key={`${userLocation[0]}-${userLocation[1]}`}
-                >
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  />
-                  
-                  <Marker position={userLocation}>
-                    <Popup>Your Location</Popup>
-                  </Marker>
-                  <Circle
-                    center={userLocation}
-                    radius={500}
-                    fillColor="blue"
-                    fillOpacity={0.1}
-                    color="blue"
-                    weight={2}
-                  />
-                  
-                  {restaurants.map(restaurant => (
-                    <Marker key={restaurant.id} position={[restaurant.lat, restaurant.lng]}>
-                      <Popup>
-                        <div className="text-center">
-                          <h3 className="font-semibold">{restaurant.name}</h3>
-                          <p className="text-sm text-gray-600">{restaurant.address}</p>
-                          <p className="text-sm text-blue-600 font-medium">
-                            ~{restaurant.estimatedTime} min delivery
-                          </p>
+                  radius={500}
+                  fillColor="blue"
+                  fillOpacity={0.1}
+                  color="blue"
+                  weight={2}
+                />
+                
+                {restaurants.map(restaurant => (
+                  <Marker key={restaurant.id} position={[restaurant.lat, restaurant.lng]}>
+                    <Popup>
+                      <div className="text-center p-2">
+                        <h3 className="font-bold text-gray-900 mb-1">{restaurant.name}</h3>
+                        <p className="text-xs text-gray-600 mb-2">{restaurant.address}</p>
+                        <div className="flex items-center justify-center gap-1 text-green-600">
+                          <Clock className="h-3 w-3" />
+                          <span className="text-xs font-semibold">~{restaurant.estimatedTime} min</span>
                         </div>
-                      </Popup>
-                    </Marker>
-                  ))}
-                </MapContainer>
-              ) : (
-                <div className="h-full flex items-center justify-center bg-gray-100 rounded-bl-3xl">
-                  <p className="text-gray-500">Loading map...</p>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded-bl-[2.5rem]">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center mb-4 mx-auto">
+                    <Navigation className="h-8 w-8 text-gray-400 animate-pulse" />
+                  </div>
+                  <p className="text-gray-600 font-medium">Loading your location...</p>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+          </div>
 
-            {/* Restaurant info sidebar */}
-            <div className="w-80 p-6 bg-gradient-to-br from-gray-50 to-white border-l border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Nearest Restaurant</h3>
-              
-              {nearestRestaurant && (
-                <div className="space-y-4">
-                  <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-                    <h4 className="font-semibold text-gray-900 mb-2">{nearestRestaurant.name}</h4>
-                    <p className="text-sm text-gray-600 mb-3">{nearestRestaurant.address}</p>
+          {/* Sidebar */}
+          <div className="w-80 bg-white/5 backdrop-blur-sm border-l border-white/10 p-6 overflow-y-auto">
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  Nearest Location
+                </h2>
+                
+                {nearestRestaurant && (
+                  <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg">
+                    <h3 className="font-bold text-white text-lg mb-2">{nearestRestaurant.name}</h3>
+                    <p className="text-white/70 text-sm mb-3 leading-relaxed">{nearestRestaurant.address}</p>
                     
-                    <div className="flex items-center gap-2 text-green-600">
-                      <Clock className="h-4 w-4" />
-                      <span className="text-sm font-medium">
-                        Estimated delivery: {nearestRestaurant.estimatedTime} minutes
+                    <div className="flex items-center gap-2 text-green-400 mb-4">
+                      <div className="w-8 h-8 bg-green-400/20 rounded-full flex items-center justify-center">
+                        <Clock className="h-4 w-4" />
+                      </div>
+                      <span className="text-sm font-semibold">
+                        {nearestRestaurant.estimatedTime} min delivery
                       </span>
                     </div>
+                    
+                    <Button className="w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl py-3 shadow-lg transition-all duration-200 hover:shadow-xl">
+                      Order Now
+                    </Button>
                   </div>
-                  
-                  <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-2xl">
-                    Order from this location
-                  </Button>
-                </div>
-              )}
-              
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <h4 className="font-semibold text-gray-900 mb-3">All Locations</h4>
+                )}
+              </div>
+
+              <div>
+                <h3 className="text-md font-semibold text-white mb-3 flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-white/70" />
+                  All Locations
+                </h3>
                 <div className="space-y-2">
                   {restaurants.map(restaurant => (
-                    <div key={restaurant.id} className="flex justify-between items-center text-sm">
-                      <span className="text-gray-700">{restaurant.name}</span>
-                      <div className="flex items-center gap-1 text-gray-500">
-                        <Clock className="h-3 w-3" />
-                        <span>{restaurant.estimatedTime}min</span>
+                    <div key={restaurant.id} 
+                         className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10 hover:bg-white/10 transition-all duration-200">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="text-white font-medium text-sm">{restaurant.name}</p>
+                          <p className="text-white/60 text-xs">{restaurant.address.split(',')[0]}</p>
+                        </div>
+                        <div className="flex items-center gap-1 text-white/70">
+                          <Clock className="h-3 w-3" />
+                          <span className="text-xs">{restaurant.estimatedTime}m</span>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -222,8 +247,8 @@ export const MapPanel: React.FC<MapPanelProps> = ({ isOpen, onClose }) => {
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
