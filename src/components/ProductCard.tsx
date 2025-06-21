@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useCart, Product } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import { soundManager } from '@/utils/sounds';
-import { Plus, ShoppingCart } from 'lucide-react';
+import { Plus, ShoppingCart, Flame } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -30,9 +30,19 @@ const CurrencyIcon = ({ className = "w-20 h-20", color = "currentColor" }: { cla
   </svg>
 );
 
+// Generate calories based on product name and type
+const getProductCalories = (name: string): number => {
+  if (name.toLowerCase().includes('sandwich')) return Math.floor(Math.random() * 300) + 350; // 350-650 cal
+  if (name.toLowerCase().includes('salad')) return Math.floor(Math.random() * 200) + 150; // 150-350 cal
+  if (name.toLowerCase().includes('potato')) return Math.floor(Math.random() * 250) + 200; // 200-450 cal
+  if (name.toLowerCase().includes('drink') || name.toLowerCase().includes('juice')) return Math.floor(Math.random() * 100) + 50; // 50-150 cal
+  return Math.floor(Math.random() * 400) + 200; // 200-600 cal default
+};
+
 export const ProductCard = ({ product, onNameClick, showDescription }: ProductCardProps) => {
   const { addToCart } = useCart();
   const [isAnimating, setIsAnimating] = useState(false);
+  const calories = getProductCalories(product.name);
 
   const handleAddToCart = () => {
     setIsAnimating(true);
@@ -107,11 +117,17 @@ export const ProductCard = ({ product, onNameClick, showDescription }: ProductCa
             
             {/* Description that appears below the name */}
             <div className={`transition-all duration-300 overflow-hidden ${
-              showDescription ? 'max-h-20 opacity-100 mt-2' : 'max-h-0 opacity-0'
+              showDescription ? 'max-h-32 opacity-100 mt-2' : 'max-h-0 opacity-0'
             }`}>
-              <p className="text-sm text-white/90 leading-relaxed">
+              <p className="text-sm text-white/90 leading-relaxed mb-2">
                 {product.description || "Delicious and fresh, made with the finest ingredients for your enjoyment."}
               </p>
+              
+              {/* Calories information */}
+              <div className="flex items-center gap-1 text-orange-300">
+                <Flame className="h-4 w-4" />
+                <span className="text-sm font-medium">{calories} calories</span>
+              </div>
             </div>
           </div>
         </div>
