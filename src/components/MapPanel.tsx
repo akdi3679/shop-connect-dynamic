@@ -133,7 +133,7 @@ export const MapPanel: React.FC<MapPanelProps> = ({ isOpen, onClose }) => {
           <div className="flex h-full">
             {/* Map */}
             <div className="flex-1 relative">
-              {userLocation && (
+              {userLocation ? (
                 <MapContainer
                   center={userLocation}
                   zoom={12}
@@ -173,6 +173,10 @@ export const MapPanel: React.FC<MapPanelProps> = ({ isOpen, onClose }) => {
                     </Marker>
                   ))}
                 </MapContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center bg-gray-100 rounded-bl-3xl">
+                  <p className="text-gray-500">Loading map...</p>
+                </div>
               )}
             </div>
 
