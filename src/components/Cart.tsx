@@ -135,9 +135,20 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
         
         {/* Main Cart Content */}
         <div className={`transition-transform duration-500 ease-in-out ${showCheckout ? '-translate-x-full' : 'translate-x-0'} ${showSuccess ? '-translate-x-full' : ''}`}>
-          {/* Header without clear button */}
-          <SheetHeader className="pb-4">
+          {/* Header with Clear button only (removed duplicate close button) */}
+          <SheetHeader className="pb-4 relative">
             <SheetTitle className="text-xl font-bold text-black">Your Cart</SheetTitle>
+            {cartItems.length > 0 && (
+              <div className="absolute top-0 right-0">
+                <Button
+                  variant="ghost"
+                  onClick={clearCart}
+                  className="text-sm font-medium text-black hover:text-red-600 hover:bg-red-50 px-2 py-1 h-auto rounded-md"
+                >
+                  Clear
+                </Button>
+              </div>
+            )}
           </SheetHeader>
           
           {cartItems.length > 0 ? (
@@ -197,33 +208,33 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
                       </div>
                     </div>
                     
-                    {/* Enhanced Signature Section */}
-                    <div className="mt-4 pt-4 border-t border-white/20">
-                      <div className="flex items-end justify-between mb-3">
-                        <div className="flex items-center">
-                          {signature ? (
-                            <div className="w-20 h-16 rounded bg-transparent flex items-center justify-center border border-gray-200">
-                              <img src={signature} alt="Signature" className="max-w-full max-h-full object-contain" />
-                            </div>
-                          ) : (
-                            <div className="w-20 h-16 flex items-center justify-center">
-                              <DefaultSignatureIcon />
-                            </div>
-                          )}
-                        </div>
-                        
+                    {/* Signature Section - using flexbox */}
+                    <div className="mt-3 pt-3 border-t border-white/20">
+                      <div className="flex items-center justify-between">
                         <Button 
                           variant="ghost" 
                           size="sm"
                           onClick={() => setShowSignature(!showSignature)}
-                          className="text-sm h-8 px-4 text-gray-600 hover:text-black flex items-center gap-1 bg-gray-100 hover:bg-gray-200 rounded-lg"
+                          className="text-xs h-6 px-3 text-gray-600 hover:text-black flex items-center gap-1"
                         >
                           Sign
                         </Button>
+                        
+                        {!showSignature && (
+                          <div className="flex items-center">
+                            {signature ? (
+                              <div className="w-24 h-12 rounded bg-transparent flex items-center justify-center">
+                                <img src={signature} alt="Signature" className="max-w-full max-h-full object-contain" />
+                              </div>
+                            ) : (
+                              <DefaultSignatureIcon />
+                            )}
+                          </div>
+                        )}
                       </div>
                       
                       {showSignature && (
-                        <div className="w-full">
+                        <div className="w-full mt-2">
                           <SignaturePad 
                             onSignatureChange={setSignature}
                             onClose={() => setShowSignature(false)}
@@ -233,23 +244,12 @@ export const Cart = ({ isOpen, onOpenChange }: CartProps) => {
                       )}
                     </div>
                   </div>
-                  
-                  {/* Action buttons with flex layout */}
-                  <div className="flex gap-3">
-                    <Button
-                      variant="outline"
-                      onClick={clearCart}
-                      className="flex-1 rounded-xl bg-white/80 hover:bg-red-50 text-red-600 border-red-200 hover:border-red-300 font-medium py-3"
-                    >
-                      Clear Cart
-                    </Button>
-                    <Button 
-                      className="flex-1 rounded-xl bg-black hover:bg-gray-800 text-white font-semibold py-3"
-                      onClick={handleProceedToCheckout}
-                    >
-                      Checkout
-                    </Button>
-                  </div>
+                  <Button 
+                    className="w-full rounded-xl bg-black hover:bg-gray-800 text-white font-semibold py-3"
+                    onClick={handleProceedToCheckout}
+                  >
+                    Proceed to Checkout
+                  </Button>
                 </div>
               </SheetFooter>
             </>

@@ -3,8 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { X, Navigation, Clock, MapPin, Sun, Moon } from 'lucide-react';
-import { useTheme } from '@/components/theme-provider';
+import { X, Navigation, Clock, MapPin } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -58,31 +57,14 @@ const restaurants: Restaurant[] = [
 ];
 
 export const MapPanel: React.FC<MapPanelProps> = ({ isOpen, onClose }) => {
-  const { theme, setTheme } = useTheme();
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [nearestRestaurant, setNearestRestaurant] = useState<Restaurant | null>(null);
-  const [isLocationReady, setIsLocationReady] = useState(false);
-  const [locationError, setLocationError] = useState<string | null>(null);
+  const [isMapReady, setIsMapReady] = useState(false);
 
   useEffect(() => {
-    if (!isOpen) return;
-
-    console.log('MapPanel opened, getting location...');
-    
-    // Reset states when opening
-    setIsLocationReady(false);
-    setLocationError(null);
-
-    if (navigator.geolocation) {
-      const options = {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000
-      };
-
+    if (isOpen && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          console.log('Location obtained:', position.coords);
           const userLat = position.coords.latitude;
           const userLng = position.coords.longitude;
           setUserLocation([userLat, userLng]);
@@ -100,23 +82,16 @@ export const MapPanel: React.FC<MapPanelProps> = ({ isOpen, onClose }) => {
           });
           
           setNearestRestaurant(nearest);
-          setIsLocationReady(true);
+          setIsMapReady(true);
         },
         (error) => {
           console.error('Error getting location:', error);
-          setLocationError(error.message);
           // Fallback to NYC location
           setUserLocation([40.7128, -74.0060]);
           setNearestRestaurant(restaurants[0]);
-          setIsLocationReady(true);
-        },
-        options
+          setIsMapReady(true);
+        }
       );
-    } else {
-      console.log('Geolocation not supported, using fallback');
-      setUserLocation([40.7128, -74.0060]);
-      setNearestRestaurant(restaurants[0]);
-      setIsLocationReady(true);
     }
   }, [isOpen]);
 
@@ -130,10 +105,6 @@ export const MapPanel: React.FC<MapPanelProps> = ({ isOpen, onClose }) => {
       Math.sin(dLon/2) * Math.sin(dLon/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
-  };
-
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   if (!isOpen) return null;
@@ -152,87 +123,70 @@ export const MapPanel: React.FC<MapPanelProps> = ({ isOpen, onClose }) => {
               <p className="text-sm text-white/70 font-medium">Discover nearby GourmetGo locations</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {/* Theme toggle button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white transition-all duration-200"
-            >
-              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white transition-all duration-200"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 text-white transition-all duration-200"
+          >
+            <X className="h-5 w-5" />
+          </Button>
         </div>
 
         <div className="flex h-full">
           {/* Map Container */}
           <div className="flex-1 relative overflow-hidden rounded-bl-[2.5rem]">
-            {isLocationReady && userLocation ? (
-              <div key={`map-${userLocation[0]}-${userLocation[1]}-${Date.now()}`} className="h-full w-full">
-                <MapContainer
+            {isMapReady && userLocation ? (
+              <MapContainer
+                center={userLocation}
+                zoom={12}
+                style={{ height: '100%', width: '100%' }}
+                className="rounded-bl-[2.5rem]"
+                key={`${userLocation[0]}-${userLocation[1]}`}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                
+                <Marker position={userLocation}>
+                  <Popup>
+                    <div className="text-center font-medium">
+                      <p className="text-blue-600">📍 Your Location</p>
+                    </div>
+                  </Popup>
+                </Marker>
+                <Circle
                   center={userLocation}
-                  zoom={12}
-                  style={{ height: '100%', width: '100%' }}
-                  className="rounded-bl-[2.5rem]"
-                  attributionControl={false}
-                  zoomControl={false}
-                >
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  />
-                  
-                  <Marker position={userLocation}>
+                  radius={500}
+                  fillColor="blue"
+                  fillOpacity={0.1}
+                  color="blue"
+                  weight={2}
+                />
+                
+                {restaurants.map(restaurant => (
+                  <Marker key={restaurant.id} position={[restaurant.lat, restaurant.lng]}>
                     <Popup>
-                      <div className="text-center font-medium">
-                        <p className="text-blue-600">📍 Your Location</p>
+                      <div className="text-center p-2">
+                        <h3 className="font-bold text-gray-900 mb-1">{restaurant.name}</h3>
+                        <p className="text-xs text-gray-600 mb-2">{restaurant.address}</p>
+                        <div className="flex items-center justify-center gap-1 text-green-600">
+                          <Clock className="h-3 w-3" />
+                          <span className="text-xs font-semibold">~{restaurant.estimatedTime} min</span>
+                        </div>
                       </div>
                     </Popup>
                   </Marker>
-                  <Circle
-                    center={userLocation}
-                    radius={500}
-                    fillColor="blue"
-                    fillOpacity={0.1}
-                    color="blue"
-                    weight={2}
-                  />
-                  
-                  {restaurants.map(restaurant => (
-                    <Marker key={restaurant.id} position={[restaurant.lat, restaurant.lng]}>
-                      <Popup>
-                        <div className="text-center p-2">
-                          <h3 className="font-bold text-gray-900 mb-1">{restaurant.name}</h3>
-                          <p className="text-xs text-gray-600 mb-2">{restaurant.address}</p>
-                          <div className="flex items-center justify-center gap-1 text-green-600">
-                            <Clock className="h-3 w-3" />
-                            <span className="text-xs font-semibold">~{restaurant.estimatedTime} min</span>
-                          </div>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  ))}
-                </MapContainer>
-              </div>
+                ))}
+              </MapContainer>
             ) : (
               <div className="h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded-bl-[2.5rem]">
                 <div className="text-center">
                   <div className="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center mb-4 mx-auto">
                     <Navigation className="h-8 w-8 text-gray-400 animate-pulse" />
                   </div>
-                  <p className="text-gray-600 font-medium">
-                    {locationError ? `Location error: ${locationError}` : 'Loading your location...'}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">Current theme: {theme}</p>
+                  <p className="text-gray-600 font-medium">Loading your location...</p>
                 </div>
               </div>
             )}
@@ -241,19 +195,6 @@ export const MapPanel: React.FC<MapPanelProps> = ({ isOpen, onClose }) => {
           {/* Sidebar */}
           <div className="w-80 bg-white/5 backdrop-blur-sm border-l border-white/10 p-6 overflow-y-auto">
             <div className="space-y-6">
-              {/* Theme info */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-                <h3 className="text-md font-semibold text-white mb-2">Theme Status</h3>
-                <p className="text-white/70 text-sm">Current: {theme}</p>
-                <Button
-                  onClick={toggleTheme}
-                  className="mt-2 w-full bg-white/20 hover:bg-white/30 text-white border-0"
-                  variant="outline"
-                >
-                  Switch to {theme === 'dark' ? 'Light' : 'Dark'}
-                </Button>
-              </div>
-
               <div>
                 <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
