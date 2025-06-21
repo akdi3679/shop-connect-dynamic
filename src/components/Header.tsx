@@ -19,7 +19,10 @@ export const Header = () => {
     if (!hasShownNotification) {
       const timer = setTimeout(() => {
         toast.success(
-          <div className="flex items-center space-x-3 bg-white backdrop-blur-lg rounded-xl p-4 border border-white/30 shadow-lg w-full">
+          <div 
+            className="flex items-center space-x-3 bg-white backdrop-blur-lg rounded-xl p-4 border border-white/30 shadow-lg w-full cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => setIsMapOpen(true)}
+          >
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
               <Map className="h-5 w-5 text-white" />
             </div>
@@ -37,10 +40,7 @@ export const Header = () => {
               boxShadow: 'none',
               padding: '0',
             },
-            className: 'bg-transparent border-none shadow-none p-0 cursor-pointer',
-            onClick: () => {
-              setIsMapOpen(true);
-            },
+            className: 'bg-transparent border-none shadow-none p-0',
             duration: 8000,
           }
         );
