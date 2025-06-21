@@ -26,7 +26,7 @@ interface Restaurant {
   lat: number;
   lng: number;
   address: string;
-  estimatedTime: number; // in minutes
+  estimatedTime: number;
 }
 
 const restaurants: Restaurant[] = [
@@ -59,6 +59,7 @@ const restaurants: Restaurant[] = [
 export const MapPanel: React.FC<MapPanelProps> = ({ isOpen, onClose }) => {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [nearestRestaurant, setNearestRestaurant] = useState<Restaurant | null>(null);
+  const [isMapReady, setIsMapReady] = useState(false);
 
   useEffect(() => {
     if (isOpen && navigator.geolocation) {
@@ -81,12 +82,14 @@ export const MapPanel: React.FC<MapPanelProps> = ({ isOpen, onClose }) => {
           });
           
           setNearestRestaurant(nearest);
+          setIsMapReady(true);
         },
         (error) => {
           console.error('Error getting location:', error);
           // Fallback to NYC location
           setUserLocation([40.7128, -74.0060]);
           setNearestRestaurant(restaurants[0]);
+          setIsMapReady(true);
         }
       );
     }
@@ -133,19 +136,19 @@ export const MapPanel: React.FC<MapPanelProps> = ({ isOpen, onClose }) => {
           <div className="flex h-full">
             {/* Map */}
             <div className="flex-1 relative">
-              {userLocation ? (
+              {isMapReady && userLocation ? (
                 <MapContainer
                   center={userLocation}
                   zoom={12}
                   style={{ height: '100%', width: '100%' }}
                   className="rounded-bl-3xl"
+                  key={`${userLocation[0]}-${userLocation[1]}`}
                 >
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   />
                   
-                  {/* User location */}
                   <Marker position={userLocation}>
                     <Popup>Your Location</Popup>
                   </Marker>
@@ -158,7 +161,6 @@ export const MapPanel: React.FC<MapPanelProps> = ({ isOpen, onClose }) => {
                     weight={2}
                   />
                   
-                  {/* Restaurant locations */}
                   {restaurants.map(restaurant => (
                     <Marker key={restaurant.id} position={[restaurant.lat, restaurant.lng]}>
                       <Popup>
@@ -180,7 +182,7 @@ export const MapPanel: React.FC<MapPanelProps> = ({ isOpen, onClose }) => {
               )}
             </div>
 
-            {/* Nearest restaurant info */}
+            {/* Restaurant info sidebar */}
             <div className="w-80 p-6 bg-gradient-to-br from-gray-50 to-white border-l border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Nearest Restaurant</h3>
               
